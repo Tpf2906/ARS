@@ -1,7 +1,8 @@
+"""Forward kinematics for the robot"""
 import numpy as np
+from robot import ROBOT_RADIUS
 
-# TODO: fix where we get l from
-l = 10 # distance between wheels
+L = ROBOT_RADIUS # distance between wheels
 
 def raw_state_change(state, d_t):
     """state change not accounting for collisions"""
@@ -9,12 +10,11 @@ def raw_state_change(state, d_t):
     # Unpack state
     x, y = state[0], state[1]
     theta = state[2]
-    v_l, v_r = state[3], state[4]    
+    v_l, v_r = state[3], state[4]
 
     # intermediate variables
-    v  = 0.5 * (v_l + v_r)
     r = 0.5 * (v_l + v_r) / (v_r - v_l)
-    omega = (v_r - v_l) / l
+    omega = (v_r - v_l) / L
     icc = (x - r * np.sin(theta), y + r * np.cos(theta))
 
     # calculate new state
@@ -37,4 +37,4 @@ def raw_state_change(state, d_t):
         theta += omega * d_t
 
     # new x, y, and theta
-    return np.array([x, y, theta]) 
+    return np.array([x, y, theta])
