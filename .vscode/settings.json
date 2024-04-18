@@ -1,5 +1,0 @@
-{
-    "pylint.args": [
-        "\"--python.lintting.pylintArgs\" : [\"--extension-pkg-whitelist=pygame\"]"
-    ]
-}

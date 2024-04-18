@@ -1,5 +1,7 @@
 """ main.py used to run the game """
-import pygame
+# disabling pylint no-member error for pygame
+# pylint: disable=no-member
+import pygame 
 from maze import Maze, WIDTH, HEIGHT, CELL_SIZE, NUM_ROOMS, ROOM_SIZE, BLACK, WHITE, FONT
 from robot import Robot
 
