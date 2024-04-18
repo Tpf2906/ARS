@@ -10,6 +10,7 @@ ROBOT_RADIUS = CELL_SIZE // 3
 ROBOT_COLOR = (255, 0, 0) 
 SENSOR_COLOR = (0, 255, 0) 
 TEXT_COLOR = (255, 255, 0) 
+TEXT_COLOR_SPEED = (0, 0, 0) 
 NUM_SENSORS = 12  
 SENSOR_MAX_DISTANCE = WIDTH  
 ROBOT_SPEED = 2
@@ -27,6 +28,9 @@ class Robot:
         self.x, self.y = start_pos
         self.sensors = [0] * NUM_SENSORS
         self.angle = 0
+        self.prev_x, self.prev_y = 0, 0
+        #self.is_moving = False
+        self.speed = 0
 
     def update_sensors(self):
         """Update the sensor readings based on the robot's current position."""
@@ -65,6 +69,8 @@ class Robot:
         return distance
 
     def move(self, direction):
+        self.prev_x, self.prev_y = self.x, self.y
+        
         """Move the robot in the given direction."""
         if direction == 'UP':
             self.y -= ROBOT_SPEED
@@ -80,6 +86,10 @@ class Robot:
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
         self.y = min(self.y, HEIGHT - ROBOT_RADIUS)
         
+        #self.is_moving = not (self.x == self.prev_x and self.y == self.prev_y)
+        self.speed = ROBOT_SPEED if (self.x != self.prev_x or self.y != self.prev_y) else 0
+
+
     def draw_sensor_text(self, screen, sensor_distance, angle, distance_multiplier=1.1):
         """
         Draw the sensor distance reading as text on the screen.

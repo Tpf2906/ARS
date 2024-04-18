@@ -57,11 +57,18 @@ class MazeGame:
                 self.robot.move('LEFT')
             if self.moving_right:
                 self.robot.move('RIGHT')
+            if not (self.moving_up or self.moving_down or self.moving_left or self.moving_right):
+                self.robot.speed = 0
 
             self.screen.fill(BLACK)
             self.maze.draw(self.screen)
             self.robot.update_sensors()
             self.robot.draw(self.screen)
+
+            # Display the speed of the robot (0 or 2)
+            speed_text = FONT.render(f'Speed: {self.robot.speed}', True, WHITE)
+            self.screen.blit(speed_text, (10, 10))
+
             pygame.display.flip()
             self.clock.tick(60)
 
