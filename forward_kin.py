@@ -31,7 +31,6 @@ def motion_without_collison(state, d_t):
 
     # handle general case
     else:
-        print("ran the general case")
         # intermidiate variables
         r = L / 2 * (v_l + v_r) / (v_r - v_l)
         icc = (x - r * np.sin(theta), y + r * np.cos(theta))
