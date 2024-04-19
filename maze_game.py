@@ -26,40 +26,40 @@ class MazeGame:
     def run(self):
         """Run the main game loop."""
         running = True
+        vr, vl = 0, 0
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP:
-                        self.moving_up = True
-                    elif event.key == pygame.K_DOWN:
-                        self.moving_down = True
-                    elif event.key == pygame.K_LEFT:
-                        self.moving_left = True
-                    elif event.key == pygame.K_RIGHT:
-                        self.moving_right = True
-                elif event.type == pygame.KEYUP:
-                    if event.key == pygame.K_UP:
-                        self.moving_up = False
-                    elif event.key == pygame.K_DOWN:
-                        self.moving_down = False
-                    elif event.key == pygame.K_LEFT:
-                        self.moving_left = False
-                    elif event.key == pygame.K_RIGHT:
-                        self.moving_right = False
+            # Get the list of keys pressed
+            keys = pygame.key.get_pressed()
+
+            # update left wheel
+            if keys[pygame.K_q]:
+                vl = 1
+            elif keys[pygame.K_a]:
+                vl = -1
+            else:
+                vl = 0
+
+            # update right wheel
+            if keys[pygame.K_e]:
+                vr = 1
+            elif keys[pygame.K_d]:
+                vr = -1
+            else:
+                vr = 0
 
             # Move the robot
-            if self.moving_up:
-                self.robot.move('UP')
-            if self.moving_down:
-                self.robot.move('DOWN')
-            if self.moving_left:
-                self.robot.move('LEFT')
-            if self.moving_right:
-                self.robot.move('RIGHT')
-            if not (self.moving_up or self.moving_down or self.moving_left or self.moving_right):
-                self.robot.speed = 0
+            if vr != 0 or vl != 0:
+                # add some spin to prevent dead whe
+                if vr == 0 and vl != 0:
+                    vr = vl * 0.7
+
+                if vl == 0 and vr != 0:
+                    vl = vr * 0.7
+
+                self.robot.move_with_diff_drive(vl, vr)
 
             self.screen.fill(BLACK)
             self.maze.draw(self.screen)

@@ -6,16 +6,7 @@ from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT
 from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, ROBOT_SPEED,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
 
-#TODO: create a confg file to store all the constants
-ROBOT_RADIUS = CELL_SIZE // 3
-ROBOT_COLOR = (255, 0, 0)
-SENSOR_COLOR = (0, 255, 0)
-SENSOR_COLOR_FORWARD = (0, 0, 255)
-TEXT_COLOR = (255, 255, 0)
-TEXT_COLOR_SPEED = (0, 0, 0)
-NUM_SENSORS = 12
-SENSOR_MAX_DISTANCE = WIDTH
-ROBOT_SPEED = 2
+import forward_kin
 
 class Robot:
     """Robot with sensors to navigate and sense the maze."""
@@ -37,7 +28,7 @@ class Robot:
     def update_sensors(self, angle = 0):
         """Update the sensor readings based on the robot's current position."""
         for i in range(NUM_SENSORS):
-            sensor_angle = math.radians(self.angle + i * (360 / NUM_SENSORS))
+            sensor_angle = self.angle + i * (2 * math.pi / NUM_SENSORS)
             self.sensors[i] = self._raycast(sensor_angle + angle)
 
     def _raycast(self, angle):
@@ -64,45 +55,34 @@ class Robot:
             grid_x, grid_y = int(x // CELL_SIZE), int(y // CELL_SIZE)
 
             # Check if the ray has hit a wall in the maze
-            if self.maze.grid[grid_y][grid_x] == 1:
+            if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1: #pylint: disable=line-too-long
                 break
 
         # Return the total distance from the edge of the robot to the wall
         return distance
 
-    #TODO: (Jounaid) write alternative for differential drive control
-    def move(self, direction):
-        """Move the robot in the given direction."""
-        self.prev_x, self.prev_y = self.x, self.y
+    def move_with_diff_drive(self, vl, vr):
+        """Move the robot with differential drive control."""
 
-        # move and reorient the robot
-        if direction == 'UP':
-            self.y -= ROBOT_SPEED
-            self.angle = 270
-        elif direction == 'DOWN':
-            self.y += ROBOT_SPEED
-            self.angle = 90
-        elif direction == 'LEFT':
-            self.x -= ROBOT_SPEED
-            self.angle = 180
-        elif direction == 'RIGHT':
-            self.x += ROBOT_SPEED
-            self.angle = 0
-        elif direction == 'RIGHT' & direction == 'UP':
-            self.y -= ROBOT_SPEED
-            self.x += ROBOT_SPEED
-            self.angle = 0
+        # create state vector
+        state = [self.x, self.y, self.angle, vl, vr]
 
-        # Check for collision with the outer edges of the window
+        # update the state
+        new_state = forward_kin.motion_without_collison(state, 1)
+
+        # update the robot's position
+        self.x, self.y, self.angle = new_state[0], new_state[1], new_state[2]
+
+        # check for collision with the outer edges of the window
         self.x = max(self.x, ROBOT_RADIUS)
         self.y = max(self.y, ROBOT_RADIUS)
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
         self.y = min(self.y, HEIGHT - ROBOT_RADIUS)
 
+        # update the speed
         self.speed = ROBOT_SPEED if (self.x != self.prev_x or self.y != self.prev_y) else 0
 
-
-    def draw_sensor_text(self, screen, sensor_distance, angle, distance_multiplier=1.1):
+    def _draw_sensor_text(self, screen, sensor_distance, angle, distance_multiplier=1.1):
         """
         Draw the sensor distance reading as text on the screen.
         :param screen: Pygame screen object to draw the text.
@@ -121,14 +101,14 @@ class Robot:
 
         # Sensor that should be highlighted is the one aligned with the angle
         for i, sensor_distance in enumerate(self.sensors):
-            sensor_angle = math.radians(self.angle + i * (360 / NUM_SENSORS))
+            sensor_angle = self.angle + i * (2 * math.pi / NUM_SENSORS)
             end_x = self.x + sensor_distance * math.cos(sensor_angle) + ROBOT_RADIUS * math.cos(sensor_angle) #pylint: disable=line-too-long
             end_y = self.y + sensor_distance * math.sin(sensor_angle) + ROBOT_RADIUS * math.sin(sensor_angle) #pylint: disable=line-too-long
             # Forward sensor direction check
             if i == 0:  # Assuming forward direction is index 0 after the angle correction
-                sensor_color = (255, 0, 255)  # White for forward direction
+                sensor_color = (255, 0, 255)  # Purple for forward direction
             else:
                 sensor_color = SENSOR_COLOR
 
             pygame.draw.line(screen, sensor_color, (self.x, self.y), (end_x, end_y), 2)
-            self.draw_sensor_text(screen, sensor_distance, sensor_angle)
+            self._draw_sensor_text(screen, sensor_distance, sensor_angle)

@@ -40,6 +40,8 @@ def motion_without_collison(state, d_t):
         y= (x-icc[0]) * np.sin(omega * d_t) + (y-icc[1]) * np.cos(omega * d_t) + icc[1]
         theta = theta + omega * d_t
 
+    # theta wrap around
+    theta = theta % (2 * np.pi)
     # new x, y, and theta
     return np.array([x, y, theta])
 
