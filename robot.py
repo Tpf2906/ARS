@@ -38,8 +38,8 @@ class Robot:
         for i in range(NUM_SENSORS):
             sensor_angle = math.radians(self.angle + i * (360 / NUM_SENSORS))
             self.sensors[i] = self._raycast(sensor_angle + angle)
-            
-    #TODO: (@Lisa) modifying 
+
+    #TODO: (@Lisa) modifying
     def _raycast(self, angle):
         """
         Cast a ray from the edge of the robot at a given angle to return the distance to the wall.
@@ -50,7 +50,7 @@ class Robot:
 
         # Initialize ray's position to this starting point on the robot's circumference
         x, y = start_x, start_y
-        distance = 0
+        distance = -1
 
         # Calculate the unit vector for the ray
         dx = math.cos(angle)
@@ -68,14 +68,13 @@ class Robot:
                 break
 
         # Return the total distance from the edge of the robot to the wall
-        print("Debug.robot._raycast: distance: ", distance, "x: ", grid_x, "y: ", grid_y, "start_x: ", start_x, "start_y: ", start_y)
         return distance
 
     #TODO: (Jounaid) write alternative for differential drive control
     def move(self, direction):
-        self.prev_x, self.prev_y = self.x, self.y
-        
         """Move the robot in the given direction."""
+        self.prev_x, self.prev_y = self.x, self.y
+
         if direction == 'UP':
             self.y -= ROBOT_SPEED
             self.angle = 270
