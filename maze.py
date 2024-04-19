@@ -1,6 +1,6 @@
-import pygame
+"""module containing code to generate a maze and draw it on the screen"""
 import random
-import math
+import pygame
 
 # Global constants
 WIDTH, HEIGHT = 1000, 800
@@ -8,13 +8,14 @@ CELL_SIZE = 40
 NUM_ROOMS = 8
 ROOM_SIZE = 1
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0) 
+BLACK = (0, 0, 0)
 
 #TODO: this should probably be in the main
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)
 
 class Maze:
+    """Class to generate and draw a maze."""
     def __init__(self, width, height, cell_size):
         self.width = width
         self.height = height
@@ -36,10 +37,14 @@ class Maze:
 
             for direction in directions:
                 nx, ny = cx, cy
-                if direction == 0: nx -= 2
-                elif direction == 1: ny += 2
-                elif direction == 2: nx += 2
-                elif direction == 3: ny -= 2
+                if direction == 0:
+                    nx -= 2
+                elif direction == 1:
+                    ny += 2
+                elif direction == 2:
+                    nx += 2
+                elif direction == 3:
+                    ny -= 2
 
                 if 1 <= nx < self.rows - 1 and 1 <= ny < self.cols - 1 and self.grid[nx][ny] == 1:
                     self.grid[cx + (nx - cx) // 2][cy + (ny - cy) // 2] = 0
@@ -66,4 +71,4 @@ class Maze:
         for x in range(self.rows):
             for y in range(self.cols):
                 color = WHITE if self.grid[x][y] == 0 else BLACK
-                pygame.draw.rect(screen, color, (y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size))
+                pygame.draw.rect(screen, color, (y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size)) #pylint: disable=line-too-long

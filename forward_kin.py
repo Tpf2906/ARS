@@ -48,7 +48,7 @@ def motion_with_collision(state, d_t):
     """state change accounting for collisions"""
     pass
 
-#TODO:(jounaid) Robot_racasting is useful outside of the robot class, consider moving it to a utility file
+#TODO:(@Jounaid) Robot_racasting is useful outside of the robot class, consider moving it to a utility file pylint: disable=line-too-long
 def wall_angle(sensors):
     """Calculate the angle of the  wall, relative to the shortest sensor reading.
        to simplify the syntax we will work directly with the maths:
@@ -66,7 +66,7 @@ def wall_angle(sensors):
     index_a = sensors.index(side_a)
 
     # get side_b candidates, the adjacent sensors
-    index_b_candidates = [index_a - 1 % len(sensors), index_a + 1 % len(sensors)] 
+    index_b_candidates = [index_a - 1 % len(sensors), index_a + 1 % len(sensors)]
     side_b_candidates = [sensors[index_b_candidates[0]], sensors[index_b_candidates[1]]]
 
     # find the shortest side_b and its index

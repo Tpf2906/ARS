@@ -1,7 +1,7 @@
 """ main.py used to run the game """
 # disabling pylint no-member error for pygame
 # pylint: disable=no-member
-import pygame 
+import pygame
 from maze import Maze, WIDTH, HEIGHT, CELL_SIZE, NUM_ROOMS, ROOM_SIZE, BLACK, WHITE, FONT
 from robot import Robot
 
@@ -16,12 +16,12 @@ class MazeGame:
         self.maze = Maze(WIDTH, HEIGHT, CELL_SIZE)
         self.maze.dfs(1, 1)
         self.maze.create_rooms(NUM_ROOMS, ROOM_SIZE)
-        self.robot = Robot(self.maze, (CELL_SIZE * 1.5, CELL_SIZE * 1.5))  # Starting the robot in the first cell
+        self.robot = Robot(self.maze, (CELL_SIZE * 1.5, CELL_SIZE * 1.5))  # Starting the robot in the first cell, pylint: disable=line-too-long
         self.moving_up = False
         self.moving_down = False
         self.moving_left = False
         self.moving_right = False
-        
+
     def run(self):
         """Run the main game loop."""
         running = True

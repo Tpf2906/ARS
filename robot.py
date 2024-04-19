@@ -7,13 +7,13 @@ from maze import CELL_SIZE, WIDTH, HEIGHT, FONT
 
 
 ROBOT_RADIUS = CELL_SIZE // 3
-ROBOT_COLOR = (255, 0, 0) 
-SENSOR_COLOR = (0, 255, 0) 
+ROBOT_COLOR = (255, 0, 0)
+SENSOR_COLOR = (0, 255, 0)
 SENSOR_COLOR_FORWARD = (0, 0, 255)
-TEXT_COLOR = (255, 255, 0) 
-TEXT_COLOR_SPEED = (0, 0, 0) 
-NUM_SENSORS = 12  
-SENSOR_MAX_DISTANCE = WIDTH  
+TEXT_COLOR = (255, 255, 0)
+TEXT_COLOR_SPEED = (0, 0, 0)
+NUM_SENSORS = 12
+SENSOR_MAX_DISTANCE = WIDTH
 ROBOT_SPEED = 2
 
 class Robot:
@@ -111,17 +111,16 @@ class Robot:
         end_y = self.y + sensor_distance * math.sin(angle) * distance_multiplier
         text_surface = FONT.render(str(int(sensor_distance)), True, TEXT_COLOR)
         screen.blit(text_surface, (end_x, end_y))
-            
-            
+
     def draw(self, screen):
+        """Draw the robot on the screen."""
         pygame.draw.circle(screen, ROBOT_COLOR, (int(self.x), int(self.y)), ROBOT_RADIUS)
 
         # Sensor that should be highlighted is the one aligned with the angle
         for i, sensor_distance in enumerate(self.sensors):
             sensor_angle = math.radians(self.angle + i * (360 / NUM_SENSORS))
-            end_x = self.x + sensor_distance * math.cos(sensor_angle) + ROBOT_RADIUS * math.cos(sensor_angle)
-            end_y = self.y + sensor_distance * math.sin(sensor_angle) + ROBOT_RADIUS * math.sin(sensor_angle)
-            
+            end_x = self.x + sensor_distance * math.cos(sensor_angle) + ROBOT_RADIUS * math.cos(sensor_angle) #pylint: disable=line-too-long
+            end_y = self.y + sensor_distance * math.sin(sensor_angle) + ROBOT_RADIUS * math.sin(sensor_angle) #pylint: disable=line-too-long
             # Forward sensor direction check
             if i == 0:  # Assuming forward direction is index 0 after the angle correction
                 sensor_color = (255, 0, 255)  # White for forward direction
@@ -130,4 +129,3 @@ class Robot:
 
             pygame.draw.line(screen, sensor_color, (self.x, self.y), (end_x, end_y), 2)
             self.draw_sensor_text(screen, sensor_distance, sensor_angle)
-
