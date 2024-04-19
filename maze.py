@@ -56,6 +56,7 @@ class Maze:
             if not moved:
                 stack.pop()
 
+    #FIXME: (@Tiago) rooms can remove the wall on the edge of the maze, they shouldn't
     def create_rooms(self, num_rooms, room_size):
         """Create rooms in the maze by clearing specified areas."""
         for _ in range(num_rooms):
