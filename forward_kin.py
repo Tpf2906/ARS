@@ -1,6 +1,6 @@
 """Forward kinematics for the robot"""
 import numpy as np
-from robot import ROBOT_RADIUS
+from robot_config import ROBOT_RADIUS
 
 L = ROBOT_RADIUS # distance between wheels
 

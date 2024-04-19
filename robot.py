@@ -2,7 +2,9 @@
 import math
 import pygame
 
-from maze import CELL_SIZE, WIDTH, HEIGHT, FONT
+from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT
+from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, ROBOT_SPEED,
+                          TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
 
 #TODO: create a confg file to store all the constants
 ROBOT_RADIUS = CELL_SIZE // 3

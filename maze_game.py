@@ -2,7 +2,8 @@
 # disabling pylint no-member error for pygame
 # pylint: disable=no-member
 import pygame
-from maze import Maze, WIDTH, HEIGHT, CELL_SIZE, NUM_ROOMS, ROOM_SIZE, BLACK, WHITE, FONT
+from maze import Maze
+from maze_config import WIDTH, HEIGHT, CELL_SIZE, NUM_ROOMS, ROOM_SIZE, BLACK, WHITE, FONT
 from robot import Robot
 
 
