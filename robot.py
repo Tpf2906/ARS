@@ -2,10 +2,9 @@
 import math
 import pygame
 
-#TODO: create a confg file to store all the constants
 from maze import CELL_SIZE, WIDTH, HEIGHT, FONT
 
-
+#TODO: create a confg file to store all the constants
 ROBOT_RADIUS = CELL_SIZE // 3
 ROBOT_COLOR = (255, 0, 0)
 SENSOR_COLOR = (0, 255, 0)
@@ -74,6 +73,7 @@ class Robot:
         """Move the robot in the given direction."""
         self.prev_x, self.prev_y = self.x, self.y
 
+        # move and reorient the robot
         if direction == 'UP':
             self.y -= ROBOT_SPEED
             self.angle = 270
@@ -91,6 +91,7 @@ class Robot:
             self.x += ROBOT_SPEED
             self.angle = 0
 
+        # Check for collision with the outer edges of the window
         self.x = max(self.x, ROBOT_RADIUS)
         self.y = max(self.y, ROBOT_RADIUS)
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
