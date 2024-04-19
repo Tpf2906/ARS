@@ -46,7 +46,7 @@ def motion_without_collison(state, d_t):
 
 def motion_with_collision(state, d_t):
     """state change accounting for collisions"""
-    pass
+    raise NotImplementedError
 
 #TODO:(@Jounaid) Robot_racasting is useful outside of the robot class, consider moving it to a utility file pylint: disable=line-too-long
 def wall_angle(sensors):
