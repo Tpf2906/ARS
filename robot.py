@@ -63,7 +63,7 @@ class Robot:
             grid_x, grid_y = int(x // CELL_SIZE), int(y // CELL_SIZE)
 
             # Check if the ray has hit a wall in the maze
-            if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1:
+            if self.maze.grid[grid_y][grid_x] == 1:
                 break
 
         # Return the total distance from the edge of the robot to the wall
