@@ -39,7 +39,6 @@ class Robot:
             sensor_angle = math.radians(self.angle + i * (360 / NUM_SENSORS))
             self.sensors[i] = self._raycast(sensor_angle + angle)
 
-    #TODO: (@Lisa) modifying
     def _raycast(self, angle):
         """
         Cast a ray from the edge of the robot at a given angle to return the distance to the wall.
