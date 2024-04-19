@@ -1,4 +1,5 @@
 """ main game loop"""
+#pylint: disable=no-member
 import pygame
 
 # Initialize Pygame
