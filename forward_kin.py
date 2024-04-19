@@ -4,7 +4,8 @@ from robot import ROBOT_RADIUS
 
 L = ROBOT_RADIUS # distance between wheels
 
-def raw_state_change(state, d_t):
+#TODO: (Jounaid) consider passing the Robot rather thaan the state
+def motion_without_collison(state, d_t):
     """state change not accounting for collisions"""
 
     # Unpack state
@@ -38,3 +39,47 @@ def raw_state_change(state, d_t):
 
     # new x, y, and theta
     return np.array([x, y, theta])
+
+def motion_with_collision(state, d_t):
+    """state change accounting for collisions"""
+    pass
+
+#TODO:(jounaid) Robot_racasting is useful outside of the robot class, consider moving it to a utility file
+def wall_angle(sensors):
+    """Calculate the angle of the  wall, relative to the shortest sensor reading.
+       to simplify the syntax we will work directly with the maths:
+
+       side_a is the shortest sensor reading
+       side_b is the shortest senor reading adjacent to side_b
+       angle_c is the angle between side_a and side_b
+
+       angle_b is the anngle of the wall(side_c) relative to side_a
+       angle_b is therefore the angle of the wall relative to the shortest sensor reading
+       """
+
+    # find the shortest sensor reading
+    side_a = min(sensors)
+    index_a = sensors.index(side_a)
+
+    # get side_b candidates, the adjacent sensors
+    index_b_candidates = [index_a - 1 % len(sensors), index_a + 1 % len(sensors)] 
+    side_b_candidates = [sensors[index_b_candidates[0]], sensors[index_b_candidates[1]]]
+
+    # find the shortest side_b and its index
+    side_b = min(side_b_candidates)
+    index_b = sensors.index(side_b)
+
+    # calculate angle_c
+    angle_c = 2 * np.pi / len(sensors)
+
+    # calculate side_c
+    side_c = np.sqrt(side_a**2 + side_b**2 - 2 * side_a * side_b * np.cos(angle_c))
+
+    # calculate angle_b, using the sine rule
+    angle_b = np.arcsin(side_b * np.sin(angle_c) / side_c)
+
+    # convert radians to degrees
+    angle_b = np.degrees(angle_b)
+
+    # return index of the two sensors and the angle of the wall
+    return index_a, index_b, angle_b
