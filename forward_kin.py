@@ -14,9 +14,7 @@ def motion_without_collison(state, d_t):
     v_l, v_r = state[3], state[4]
 
     # intermediate variables
-    r = 0.5 * (v_l + v_r) / (v_r - v_l)
     omega = (v_r - v_l) / L
-    icc = (x - r * np.sin(theta), y + r * np.cos(theta))
 
     # calculate new state
     # handle special case of straight line
@@ -33,9 +31,15 @@ def motion_without_collison(state, d_t):
 
     # handle general case
     else:
-        x = np.cos(theta * d_t) * (x - icc[0]) - np.sin(theta * d_t) * (y - icc[1]) + icc[0]
-        y = np.sin(theta * d_t) * (x - icc[0]) + np.cos(theta * d_t) * (y - icc[1]) + icc[1]
-        theta += omega * d_t
+        print("ran the general case")
+        # intermidiate variables
+        r = L / 2 * (v_l + v_r) / (v_r - v_l)
+        icc = (x - r * np.sin(theta), y + r * np.cos(theta))
+
+        # calculate new x, y, and theta
+        x = (x-icc[0]) * np.cos(omega * d_t) - (y-icc[1]) * np.sin(omega * d_t) + icc[0]
+        y= (x-icc[0]) * np.sin(omega * d_t) + (y-icc[1]) * np.cos(omega * d_t) + icc[1]
+        theta = theta + omega * d_t
 
     # new x, y, and theta
     return np.array([x, y, theta])
