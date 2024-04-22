@@ -15,6 +15,8 @@ class MazeGame:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.maze = Maze(WIDTH, HEIGHT, CELL_SIZE)
+
+        #TODO: move to Maze class __init__
         self.maze.dfs(1, 1)
         self.maze.create_rooms(NUM_ROOMS, ROOM_SIZE)
         self.robot = Robot(self.maze, (CELL_SIZE * 1.5, CELL_SIZE * 1.5))  # Starting the robot in the first cell, pylint: disable=line-too-long
