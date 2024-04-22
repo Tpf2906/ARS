@@ -12,7 +12,7 @@ class MazeGame:
 
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption("Collision checker")
+        pygame.display.set_caption("Maze Robot Simulation")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.maze = Maze(WIDTH, HEIGHT, CELL_SIZE)
