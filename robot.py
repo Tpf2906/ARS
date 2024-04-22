@@ -6,7 +6,7 @@ from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT
 from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, ROBOT_SPEED,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
 
-import forward_kin
+from forward_kin import motion_with_collision
 
 class Robot:
     """Robot with sensors to navigate and sense the maze."""
@@ -23,6 +23,15 @@ class Robot:
         self.angle = 0
         self.prev_x, self.prev_y = 0, 0
         self.speed = 0
+        self.mask = self._make_mask()
+
+    def _make_mask(self):
+        """Create a mask for the robot."""
+        dot_surface = pygame.Surface((ROBOT_RADIUS*2, ROBOT_RADIUS*2), pygame.SRCALPHA) #pylint: disable=no-member
+        pygame.draw.circle(dot_surface, SENSOR_COLOR, (ROBOT_RADIUS, ROBOT_RADIUS), ROBOT_RADIUS)
+        dot_mask = pygame.mask.from_surface(dot_surface)
+
+        return dot_mask
 
     #TODO: (@Jounaid) consider variable framerate based on distance
     def update_sensors(self, angle = 0):
@@ -68,7 +77,7 @@ class Robot:
         state = [self.x, self.y, self.angle, vl, vr]
 
         # update the state
-        new_state = forward_kin.motion_without_collison(state, 1)
+        new_state = motion_with_collision(state, 1, self.maze.rect_list, self.mask)
 
         # update the robot's position
         self.x, self.y, self.angle = new_state[0], new_state[1], new_state[2]

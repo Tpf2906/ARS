@@ -1,6 +1,11 @@
 """Forward kinematics for the robot"""
 import numpy as np
+
+import pygame
+
 from robot_config import ROBOT_RADIUS
+from collision_config import NORTH, SOUTH, EAST, WEST
+
 
 L = ROBOT_RADIUS # distance between wheels
 
@@ -43,11 +48,65 @@ def motion_without_collison(state, d_t):
     # theta wrap around
     theta = theta % (2 * np.pi)
     # new x, y, and theta
-    return np.array([x, y, theta])
+    return (x, y, theta)
 
-def motion_with_collision(state, d_t):
-    """state change accounting for collisions"""
-    raise NotImplementedError
+def motion_with_collision(state, d_t, rectangle_list, mask: pygame.mask.Mask):
+    """state change accounting for collisions,"""
+
+    # detect collison with the maze walls
+    collision_list = collision_type(state, rectangle_list, mask)
+
+    # movement without collision
+    (x, y, theta) = motion_without_collison(state, d_t)
+
+    # handle collision
+    for collision in collision_list:
+        if collision == "SOUTH":
+            # can't move south
+            y = min(state[1], y) # south is y increasing, so we set y to 0. or negative to away from the wall
+        elif collision == "NORTH":
+            y = max(state[1], y) # north is y decreasing, so we set y to 0. or positive to away from the wall
+
+        elif collision == "EAST":
+            x  = max(state[0], x) # east is x increasing, so we set x to 0. or negative to away from the wall
+        elif collision == "WEST":
+            x = min(state[0], x) # west is x decreasing, so we set x to 0. or positive to away from the wall
+
+    return (x, y, theta)
+
+def collision_type(state, rectangle_list, robot_mask: pygame.mask.Mask):
+    """detect the type of collision with the maze walls"""
+    col_dict = {
+        NORTH: "NORTH",
+        SOUTH: "SOUTH",
+        EAST: "EAST",
+        WEST: "WEST"
+    }
+
+    collison_list = []
+    # check for collision with the maze walls
+    for rect in rectangle_list:
+        # create a mask for the rectangle
+        temp_surface = pygame.Surface((rect.width, rect.height))
+        temp_surface.fill((255, 255, 255))  # Fill white (color does not matter)
+        rect_mask = pygame.mask.from_surface(temp_surface)
+
+        # get the position of the rectangle
+        rect_pos = (rect.x, rect.y)
+        # get the offset
+        offset_x = rect_pos[0] - state[0] + ROBOT_RADIUS
+        offset_y = rect_pos[1] - state[1] + ROBOT_RADIUS
+
+        # check for collision from the overlap
+        col_coord = robot_mask.overlap(rect_mask, (offset_x, offset_y))
+
+        if col_coord in col_dict:
+            #TODO: (Jounaid) snap to the nearest cardinal direction
+            # add the collision type to the list
+            collison_list.append(col_dict[col_coord])
+            print(col_dict[col_coord])
+
+    return collison_list
 
 #TODO:(@Jounaid) Robot_racasting is useful outside of the robot class, consider moving it to a utility file pylint: disable=line-too-long
 def wall_angle(sensors):

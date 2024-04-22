@@ -23,6 +23,7 @@ class Maze:
         self.cols = self.width // self.cell_size
         self.rows = self.height // self.cell_size
         self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
+        self.rect_list = [] # List to store the pygame rectangles for the maze
 
     def dfs(self, start_x, start_y):
         """Generate the maze."""
@@ -67,9 +68,14 @@ class Maze:
                     if 1 <= x + i < self.rows - 1 and 1 <= y + j < self.cols - 1:
                         self.grid[x + i][y + j] = 0
 
-    def draw(self, screen):
-        """Draw the maze."""
+    def make_rects(self):
+        """Create the rectangles for the maze."""
         for x in range(self.rows):
             for y in range(self.cols):
-                color = WHITE if self.grid[x][y] == 0 else BLACK
-                pygame.draw.rect(screen, color, (y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size)) #pylint: disable=line-too-long
+                if self.grid[x][y] == 1:
+                    self.rect_list.append(pygame.Rect(y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size))#pylint: disable=line-too-long
+
+    def draw(self, screen):
+        """Draw the maze."""
+        for rect in self.rect_list:
+            pygame.draw.rect(surface=screen, color=BLACK, rect=rect)
