@@ -16,7 +16,7 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 
 # Set up the rectangle (static for this example)
-rect_pos = (150, 100)
+rect_pos = (150, 50)
 rect_size = (100, 50)
 rectangle = pygame.Rect(rect_pos, rect_size)
 
@@ -35,6 +35,8 @@ running = True
 input_vector = [0, 0]
 dot_pos = [window_size[0] // 2, window_size[1] // 2]
 speed = 0.01
+curr_col_coord = None
+prev_col_coord = None
 while running:
     # Get the list of keys pressed
     keys = pygame.key.get_pressed()
@@ -66,10 +68,19 @@ while running:
     offset_y = rect_pos[1] - dot_pos[1] + dot_radius
 
     # Check for collision
-    if dot_mask.overlap(rect_mask, (offset_x, offset_y)):
-
+    new_col_coord = dot_mask.overlap(rect_mask, (offset_x, offset_y))
+    if new_col_coord:
         # Draw the rectangle in red if there is a collision
         pygame.draw.rect(screen, RED, rectangle)
+
+    prev_col_coord = curr_col_coord
+    curr_col_coord = new_col_coord
+    if curr_col_coord != prev_col_coord and prev_col_coord is None:
+        # Print the collision coordinates, only if they change
+        print(f"Collision at {new_col_coord}, rectangle is at {rect_pos}, dot is at {tuple(dot_pos)}")
+
+        # update collision coordinates
+        curr_col_coord = new_col_coord
 
     # Update the display
     pygame.display.flip()
