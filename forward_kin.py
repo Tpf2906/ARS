@@ -68,9 +68,9 @@ def motion_with_collision(state, d_t, rectangle_list, mask: pygame.mask.Mask):
             y = max(state[1], y) # north is y decreasing, so we set y to 0. or positive to away from the wall
 
         elif collision == "EAST":
-            x  = max(state[0], x) # east is x increasing, so we set x to 0. or negative to away from the wall
+            x  = min(state[0], x) # east is x increasing, so we set x to 0. or negative to away from the wall
         elif collision == "WEST":
-            x = min(state[0], x) # west is x decreasing, so we set x to 0. or positive to away from the wall
+            x = max(state[0], x) # west is x decreasing, so we set x to 0. or positive to away from the wall
 
     return (x, y, theta)
 
