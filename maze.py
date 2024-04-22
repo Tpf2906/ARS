@@ -2,15 +2,8 @@
 import random
 import pygame
 
-# Global constants
-WIDTH, HEIGHT = 1000, 800
-CELL_SIZE = 40
-NUM_ROOMS = 8
-ROOM_SIZE = 1
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK
 
-#TODO: this should probably be in the main
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)
 
@@ -24,6 +17,10 @@ class Maze:
         self.rows = self.height // self.cell_size
         self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
         self.rect_list = [] # List to store the pygame rectangles for the maze
+
+        self.dfs(1, 1)
+        self.create_rooms(NUM_ROOMS, ROOM_SIZE)
+        self.make_rects()
 
     def dfs(self, start_x, start_y):
         """Generate the maze."""
@@ -57,7 +54,7 @@ class Maze:
             if not moved:
                 stack.pop()
 
-    #FIXME: (@Tiago) rooms can remove the wall on the edge of the maze, they shouldn't
+    #FIXME: (Tiago) rooms can remove the wall on the edge of the maze, they shouldn't
     def create_rooms(self, num_rooms, room_size):
         """Create rooms in the maze by clearing specified areas."""
         for _ in range(num_rooms):

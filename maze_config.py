@@ -9,4 +9,4 @@ NUM_ROOMS = 8
 ROOM_SIZE = 3
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-FONT = pygame.font.SysFont('Arial', 12)
+FONT = pygame.font.SysFont('Arial', 18)

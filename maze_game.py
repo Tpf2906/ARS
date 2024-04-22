@@ -3,7 +3,7 @@
 # pylint: disable=no-member
 import pygame
 from maze import Maze
-from maze_config import WIDTH, HEIGHT, CELL_SIZE, NUM_ROOMS, ROOM_SIZE, BLACK, WHITE, FONT
+from maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from robot import Robot
 
 
@@ -12,14 +12,10 @@ class MazeGame:
 
     def __init__(self):
         pygame.init()
+        pygame.display.set_caption("Collision checker")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.maze = Maze(WIDTH, HEIGHT, CELL_SIZE)
-
-        #TODO: move to Maze class __init__
-        self.maze.dfs(1, 1)
-        self.maze.create_rooms(NUM_ROOMS, ROOM_SIZE)
-        self.maze.make_rects()
 
         self.robot = Robot(self.maze, (CELL_SIZE * 1.5, CELL_SIZE * 1.5))  # Starting the robot in the first cell, pylint: disable=line-too-long
         self.moving_up = False
@@ -56,19 +52,18 @@ class MazeGame:
 
             # Move the robot
             if vr != 0 or vl != 0:
-                #TODO: fix the controls, they are inverted, don't know why
+                # invert the controls, pygame treats the y axis as inverted
+                vl, vr = vr, vl
                 self.robot.move_with_diff_drive(vl, vr)
 
             # draw the maze and the robot
             self.screen.fill(WHITE)
             self.maze.draw(self.screen)
-
-            #TODO: (Jounaid) consider moving sensor update to before the robot moves
             self.robot.update_sensors()
             self.robot.draw(self.screen)
 
             # Display the speed of the robot (0 or 2)
-            speed_text = FONT.render(f'Speed: {self.robot.speed}', True, WHITE)
+            speed_text = FONT.render(f'wheel power: {vl} | {vr}', True, WHITE)
             self.screen.blit(speed_text, (10, 10))
 
             pygame.display.flip()

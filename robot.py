@@ -3,7 +3,7 @@ import math
 import pygame
 
 from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT
-from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, ROBOT_SPEED,
+from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
 
 from forward_kin import motion_with_collision
@@ -22,7 +22,6 @@ class Robot:
         self.sensors = [0] * NUM_SENSORS
         self.angle = 0
         self.prev_x, self.prev_y = 0, 0
-        self.speed = 0
         self.mask = self._make_mask()
 
     def _make_mask(self):
@@ -33,7 +32,7 @@ class Robot:
 
         return dot_mask
 
-    #TODO: (@Jounaid) consider variable framerate based on distance
+    #TODO: (Jounaid) consider variable framerate based on distance
     def update_sensors(self, angle = 0):
         """Update the sensor readings based on the robot's current position."""
         for i in range(NUM_SENSORS):
@@ -87,9 +86,6 @@ class Robot:
         self.y = max(self.y, ROBOT_RADIUS)
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
         self.y = min(self.y, HEIGHT - ROBOT_RADIUS)
-
-        # update the speed
-        self.speed = ROBOT_SPEED if (self.x != self.prev_x or self.y != self.prev_y) else 0
 
     def _draw_sensor_text(self, screen, sensor_distance, angle, distance_multiplier=1.1):
         """

@@ -9,7 +9,6 @@ from collision_config import NORTH, SOUTH, EAST, WEST
 
 L = ROBOT_RADIUS # distance between wheels
 
-#TODO: (Jounaid) consider passing the Robot rather thaan the state
 def motion_without_collison(state, d_t):
     """state change not accounting for collisions"""
 
@@ -63,14 +62,14 @@ def motion_with_collision(state, d_t, rectangle_list, mask: pygame.mask.Mask):
     for collision in collision_list:
         if collision == "SOUTH":
             # can't move south
-            y = min(state[1], y) # south is y increasing, so we set y to 0. or negative to away from the wall
+            y = min(state[1], y) # south is y increasing, so we set y to 0. or negative to away from the wall pylint: disable=line-too-long
         elif collision == "NORTH":
-            y = max(state[1], y) # north is y decreasing, so we set y to 0. or positive to away from the wall
+            y = max(state[1], y) # north is y decreasing, so we set y to 0. or positive to away from the wall pylint: disable=line-too-long
 
         elif collision == "EAST":
-            x  = min(state[0], x) # east is x increasing, so we set x to 0. or negative to away from the wall
+            x  = min(state[0], x) # east is x increasing, so we set x to 0. or negative to away from the wall pylint: disable=line-too-long
         elif collision == "WEST":
-            x = max(state[0], x) # west is x decreasing, so we set x to 0. or positive to away from the wall
+            x = max(state[0], x) # west is x decreasing, so we set x to 0. or positive to away from the wall pylint: disable=line-too-long
 
     return (x, y, theta)
 
@@ -102,13 +101,12 @@ def collision_type(state, rectangle_list, robot_mask: pygame.mask.Mask):
 
         if col_coord in col_dict:
             #TODO: (Jounaid) consider snapping to the nearest cardinal direction
-            #TODO: (Jounaid) consider using the col coord to get the angle of the colision, for non cardinal walls
+            #TODO: (Jounaid) consider using the col coord to get the angle of the colision, for non cardinal walls pylint: disable=line-too-long
             # add the collision type to the list
             collison_list.append(col_dict[col_coord])
 
     return collison_list
 
-#TODO:(@Jounaid) Robot_racasting is useful outside of the robot class, consider moving it to a utility file pylint: disable=line-too-long
 def wall_angle(sensors):
     """Calculate the angle of the  wall, relative to the shortest sensor reading.
        to simplify the syntax we will work directly with the maths:
