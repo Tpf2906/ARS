@@ -3,7 +3,7 @@ import pygame
 
 pygame.init() # pylint: disable=no-member
 
-WIDTH, HEIGHT = 1000, 800
+WIDTH, HEIGHT = 1500, 1200
 CELL_SIZE = 40
 NUM_ROOMS = 8
 ROOM_SIZE = 3
