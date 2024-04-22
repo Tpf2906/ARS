@@ -101,10 +101,10 @@ def collision_type(state, rectangle_list, robot_mask: pygame.mask.Mask):
         col_coord = robot_mask.overlap(rect_mask, (offset_x, offset_y))
 
         if col_coord in col_dict:
-            #TODO: (Jounaid) snap to the nearest cardinal direction
+            #TODO: (Jounaid) consider snapping to the nearest cardinal direction
+            #TODO: (Jounaid) consider using the col coord to get the angle of the colision, for non cardinal walls
             # add the collision type to the list
             collison_list.append(col_dict[col_coord])
-            print(col_dict[col_coord])
 
     return collison_list
 
