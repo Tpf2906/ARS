@@ -2,7 +2,7 @@
 import random
 import pygame
 
-from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK
+from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, GREEN, NUM_LANDMARKS
 
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)
@@ -17,10 +17,12 @@ class Maze:
         self.rows = self.height // self.cell_size
         self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
         self.rect_list = [] # List to store the pygame rectangles for the maze
+        self.landmarks = []
 
         self.dfs(1, 1)
         self.create_rooms(NUM_ROOMS, ROOM_SIZE)
         self.make_rects()
+        self.add_landmark(NUM_LANDMARKS)
 
     def dfs(self, start_x, start_y):
         """Generate the maze."""
@@ -72,7 +74,19 @@ class Maze:
                 if self.grid[x][y] == 1:
                     self.rect_list.append(pygame.Rect(y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size))#pylint: disable=line-too-long
 
+    def add_landmark(self, landmarks):
+        """Add a landmark to the maze."""
+        for _ in range(landmarks):
+            while True:
+                x = random.randint(1, self.rows - 2)
+                y = random.randint(1, self.cols - 2)
+                if self.grid[x][y] == 0:
+                    self.landmarks.append(pygame.Rect(y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size))
+                    break
+
     def draw(self, screen):
         """Draw the maze."""
         for rect in self.rect_list:
             pygame.draw.rect(surface=screen, color=BLACK, rect=rect)
+        for landmark in self.landmarks:
+            pygame.draw.rect(surface=screen, color=GREEN, rect=landmark)
