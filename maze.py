@@ -2,7 +2,7 @@
 import random
 import pygame
 
-from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, GREEN, NUM_LANDMARKS
+from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, RED, NUM_LANDMARKS
 
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)
@@ -17,7 +17,7 @@ class Maze:
         self.rows = self.height // self.cell_size
         self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
         self.rect_list = [] # List to store the pygame rectangles for the maze
-        self.landmarks = []
+        self.landmarks = [] # List to store the pygame circles for the landmarks
 
         self.dfs(1, 1)
         self.create_rooms(NUM_ROOMS, ROOM_SIZE)
@@ -56,7 +56,6 @@ class Maze:
             if not moved:
                 stack.pop()
 
-    #FIXME: (Tiago) rooms can remove the wall on the edge of the maze, they shouldn't
     def create_rooms(self, num_rooms, room_size):
         """Create rooms in the maze by clearing specified areas."""
         for _ in range(num_rooms):
@@ -81,7 +80,13 @@ class Maze:
                 x = random.randint(1, self.rows - 2)
                 y = random.randint(1, self.cols - 2)
                 if self.grid[x][y] == 0:
-                    self.landmarks.append(pygame.Rect(y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size))
+                    # Store the center of the landmark
+                    center_x = y * self.cell_size + self.cell_size // 2
+                    center_y = x * self.cell_size + self.cell_size // 2
+                    self.landmarks.append((center_x, center_y))
+
+                    #Set the landmark cell to 2
+                    self.grid[x][y] = 2
                     break
 
     def draw(self, screen):
@@ -89,4 +94,4 @@ class Maze:
         for rect in self.rect_list:
             pygame.draw.rect(surface=screen, color=BLACK, rect=rect)
         for landmark in self.landmarks:
-            pygame.draw.rect(surface=screen, color=GREEN, rect=landmark)
+            pygame.draw.circle(surface=screen, color=BLACK, center=landmark, radius=self.cell_size // 2)

@@ -2,8 +2,8 @@
 import math
 import pygame
 
-from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT
-from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR,
+from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE, NUM_LANDMARKS
+from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR,SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
 
 from forward_kin import motion_with_collision
@@ -23,6 +23,7 @@ class Robot:
         self.angle = 0
         self.prev_x, self.prev_y = 0, 0
         self.mask = self._make_mask()
+        self.past_positions = [(self.x, self.y)]
 
     def _make_mask(self):
         """Create a mask for the robot."""
@@ -38,6 +39,27 @@ class Robot:
         for i in range(NUM_SENSORS):
             sensor_angle = self.angle + i * (2 * math.pi / NUM_SENSORS)
             self.sensors[i] = self._raycast(sensor_angle + angle)
+    
+
+    #TODO: (LISA) check if  the distance is within a certain threshold
+    def landmark_raycast(self,screen):
+        landmarks = self.maze.landmarks
+        start_x = self.x
+        start_y = self.y
+        for i in range(NUM_LANDMARKS):
+            end_x = landmarks[i][0]
+            end_y = landmarks[i][1]
+            dx = end_x - start_x
+            dy = end_y - start_y
+            distance = math.sqrt(dx**2 + dy**2)
+            angle = math.atan2(dy, dx)
+            if distance < SENSOR_MAX_DISTANCE:
+                ray_distance = self._raycast(angle)
+                #FIX ME
+                if (1):#(abs(ray_distance - distance) < 2):
+                    pygame.draw.line(screen, SENSOR_COLOR_LANDMARK, (start_x, start_y), (end_x, end_y), 2)
+            else:
+                break
 
     def _raycast(self, angle):
         """
@@ -81,11 +103,19 @@ class Robot:
         # update the robot's position
         self.x, self.y, self.angle = new_state[0], new_state[1], new_state[2]
 
+        # Add the current position to past positions
+        self.past_positions.append((self.x, self.y))
+
         # check for collision with the outer edges of the window
         self.x = max(self.x, ROBOT_RADIUS)
         self.y = max(self.y, ROBOT_RADIUS)
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
         self.y = min(self.y, HEIGHT - ROBOT_RADIUS)
+
+    def draw_path(self, screen):
+        """Draw the robot's path on the screen."""
+        if len(self.past_positions) > 1:
+            pygame.draw.lines(screen, BLUE, False, self.past_positions, 2)  # Draw path in blue
 
     def _draw_sensor_text(self, screen, sensor_distance, angle, distance_multiplier=1.1):
         """
@@ -117,3 +147,5 @@ class Robot:
 
             pygame.draw.line(screen, sensor_color, (self.x, self.y), (end_x, end_y), 2)
             self._draw_sensor_text(screen, sensor_distance, sensor_angle)
+
+  

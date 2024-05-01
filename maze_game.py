@@ -3,7 +3,7 @@
 # pylint: disable=no-member
 import pygame
 from maze import Maze
-from maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
+from maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT, BLUE
 from robot import Robot
 
 
@@ -59,6 +59,8 @@ class MazeGame:
             # draw the maze and the robot
             self.screen.fill(WHITE)
             self.maze.draw(self.screen)
+            self.robot.landmark_raycast(self.screen)
+            self.robot.draw_path(self.screen)
             self.robot.update_sensors()
             self.robot.draw(self.screen)
 
