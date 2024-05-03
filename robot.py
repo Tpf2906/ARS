@@ -43,18 +43,37 @@ class Robot:
             self.sensors[i] = self._raycast(sensor_angle + angle, 'wall')
     
 
-    def landmark_raycast(self,screen):
+    def landmark_raycast(self, screen):
         for (lx, ly) in self.maze.landmarks:
             angle = math.atan2(ly - self.y, lx - self.x)
-            distance = self._raycast(angle, 'landmark')
+            total_distance = math.sqrt((lx - self.x) ** 2 + (ly - self.y) ** 2)
+            is_obstructed = False
 
-            # Draw the line
-            pygame.draw.line(screen, SENSOR_COLOR_LANDMARK, (self.x, self.y), (lx, ly), 2)
-            self._draw_sensor_text(screen, distance, angle)
+            # Initialize ray's position to this starting point on the robot's circumference
+            x, y = self.x, self.y
+
+            # Calculate the unit vector for the ray
+            dx = math.cos(angle)
+            dy = math.sin(angle)
+
+            for distance in range(int(total_distance)):
+                x += dx
+                y += dy
+                grid_x, grid_y = int(x // CELL_SIZE), int(y // CELL_SIZE)
+
+                # Check if the ray has hit a wall in the maze
+                if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1:
+                    is_obstructed = True
+                    break
+
+            if not is_obstructed:
+                pygame.draw.line(screen, SENSOR_COLOR_LANDMARK, (self.x, self.y), (lx, ly), 2)
+                self._draw_sensor_text(screen, total_distance, angle)
+
 
     def _raycast(self, angle, obstacle_type):
         """
-        Cast a ray from the edge of the robot at a given angle to return the distance to the wall.
+        Cast a ray from the edge of the robot at a given angle to return the distance to the obstacle.
         """
         # Calculate the starting point from the robot's edge in the direction of the angle
         start_x = self.x + ROBOT_RADIUS * math.cos(angle)
@@ -62,7 +81,7 @@ class Robot:
 
         # Initialize ray's position to this starting point on the robot's circumference
         x, y = start_x, start_y
-        distance = -1
+        distance = 0
 
         # Calculate the unit vector for the ray
         dx = math.cos(angle)
@@ -78,18 +97,31 @@ class Robot:
 
                 # Check if the ray has hit a wall in the maze
                 if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1: #pylint: disable=line-too-long
-                    break
+                    return distance
+
+            return SENSOR_MAX_DISTANCE
+
         elif obstacle_type == 'landmark':
             # Raycasting loop for landmarks
             for (lx, ly) in self.maze.landmarks:
-                dx = lx - start_x
-                dy = ly - start_y
-                l_distance = math.sqrt(dx ** 2 + dy ** 2)
-                if l_distance < SENSOR_MAX_DISTANCE and l_distance > distance:
-                    distance = l_distance
-                    
-        # Return the total distance from the edge of the robot to the wall
-        return distance
+                l_distance = math.sqrt((lx - self.x) ** 2 + (ly - self.y) ** 2)
+                if l_distance < SENSOR_MAX_DISTANCE:
+                    dx = (lx - start_x) / l_distance
+                    dy = (ly - start_y) / l_distance
+
+                    ray_x, ray_y = start_x, start_y
+                    for d in range(int(l_distance)):
+                        ray_x += dx
+                        ray_y += dy
+                        grid_x, grid_y = int(ray_x // CELL_SIZE), int(ray_y // CELL_SIZE)
+
+                        if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1:
+                            return SENSOR_MAX_DISTANCE
+
+                    return l_distance
+
+            return SENSOR_MAX_DISTANCE
+
 
     def move_with_diff_drive(self, vl, vr):
         """Move the robot with differential drive control."""
