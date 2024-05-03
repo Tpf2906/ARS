@@ -1,11 +1,13 @@
 """robot.py: A simple robot class that can move around a maze."""
 import math
 import pygame
+import time
+import numpy as np
 
-from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE, NUM_LANDMARKS
+from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE, NUM_LANDMARKS, GREEN
 from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR,SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
-
+from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
 
 class Robot:
@@ -38,30 +40,19 @@ class Robot:
         """Update the sensor readings based on the robot's current position."""
         for i in range(NUM_SENSORS):
             sensor_angle = self.angle + i * (2 * math.pi / NUM_SENSORS)
-            self.sensors[i] = self._raycast(sensor_angle + angle)
+            self.sensors[i] = self._raycast(sensor_angle + angle, 'wall')
     
 
-    #TODO: (LISA) check if  the distance is within a certain threshold
     def landmark_raycast(self,screen):
-        landmarks = self.maze.landmarks
-        start_x = self.x
-        start_y = self.y
-        for i in range(NUM_LANDMARKS):
-            end_x = landmarks[i][0]
-            end_y = landmarks[i][1]
-            dx = end_x - start_x
-            dy = end_y - start_y
-            distance = math.sqrt(dx**2 + dy**2)
-            angle = math.atan2(dy, dx)
-            if distance < SENSOR_MAX_DISTANCE:
-                ray_distance = self._raycast(angle)
-                #FIX ME
-                if (1):#(abs(ray_distance - distance) < 2):
-                    pygame.draw.line(screen, SENSOR_COLOR_LANDMARK, (start_x, start_y), (end_x, end_y), 2)
-            else:
-                break
+        for (lx, ly) in self.maze.landmarks:
+            angle = math.atan2(ly - self.y, lx - self.x)
+            distance = self._raycast(angle, 'landmark')
 
-    def _raycast(self, angle):
+            # Draw the line
+            pygame.draw.line(screen, SENSOR_COLOR_LANDMARK, (self.x, self.y), (lx, ly), 2)
+            self._draw_sensor_text(screen, distance, angle)
+
+    def _raycast(self, angle, obstacle_type):
         """
         Cast a ray from the edge of the robot at a given angle to return the distance to the wall.
         """
@@ -77,17 +68,26 @@ class Robot:
         dx = math.cos(angle)
         dy = math.sin(angle)
 
-        # Raycasting loop
-        while distance < SENSOR_MAX_DISTANCE:
-            x += dx
-            y += dy
-            distance += 1
-            grid_x, grid_y = int(x // CELL_SIZE), int(y // CELL_SIZE)
+        if obstacle_type == "wall":
+            # Raycasting loop for walls
+            while distance < SENSOR_MAX_DISTANCE:
+                x += dx
+                y += dy
+                distance += 1
+                grid_x, grid_y = int(x // CELL_SIZE), int(y // CELL_SIZE)
 
-            # Check if the ray has hit a wall in the maze
-            if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1: #pylint: disable=line-too-long
-                break
-
+                # Check if the ray has hit a wall in the maze
+                if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1: #pylint: disable=line-too-long
+                    break
+        elif obstacle_type == 'landmark':
+            # Raycasting loop for landmarks
+            for (lx, ly) in self.maze.landmarks:
+                dx = lx - start_x
+                dy = ly - start_y
+                l_distance = math.sqrt(dx ** 2 + dy ** 2)
+                if l_distance < SENSOR_MAX_DISTANCE and l_distance > distance:
+                    distance = l_distance
+                    
         # Return the total distance from the edge of the robot to the wall
         return distance
 
