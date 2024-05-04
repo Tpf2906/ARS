@@ -1,4 +1,6 @@
 # TODO: (Tiago) please do a pylint check and fix the issues in the code.
+# remove the next line to see the pylint issues
+# pylint: disable=invalid-name
 import numpy as np
 
 class KalmanFilter:

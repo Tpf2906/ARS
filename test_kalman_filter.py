@@ -1,3 +1,7 @@
+# TODO: (Tiago) please do a pylint check and fix the issues in the code.
+# remove the next line to see the pylint issues
+# pylint: disable=invalid-name
+# pylint: disable=missing-class-docstring
 import unittest
 import numpy as np
 from kalman_filter import KalmanFilter
@@ -10,7 +14,8 @@ class TestKalmanFilter(unittest.TestCase):
         self.R = np.eye(4) * 0.02  # for 4 measurements
         self.initial_state = np.array([0, 0, 0])
         self.initial_P = np.eye(3) * 0.1  # state uncertainty
-        self.kf = KalmanFilter(self.A, self.B, np.eye(3), self.Q, self.R, self.initial_state, self.initial_P)
+        self.kf = KalmanFilter(self.A, self.B, np.eye(3), self.Q,
+                               self.R, self.initial_state, self.initial_P)
         self.landmarks = [(10, 10), (1, 1)]
 
 
