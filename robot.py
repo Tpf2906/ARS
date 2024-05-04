@@ -163,6 +163,8 @@ class Robot:
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
         self.y = min(self.y, HEIGHT - ROBOT_RADIUS)
 
+    def run_kalman_filter(self, vl, vr):
+        """Run the Kalman filter to estimate the robot's position."""
         # Kalman filter predict and correct steps
         control_vector = np.array([vl, vr])
         self.kalman_filter.predict(control_vector)

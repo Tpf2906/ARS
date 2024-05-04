@@ -57,6 +57,7 @@ class MazeGame:
                 # invert the controls, pygame treats the y axis as inverted
                 vl, vr = vr, vl
                 self.robot.move_with_diff_drive(vl, vr)
+                self.robot.run_kalman_filter(vl, vr)
 
             # Create the speed text
             speed_text = FONT.render(f'wheel power: {vl} | {vr}', True, WHITE)
