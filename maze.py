@@ -2,7 +2,7 @@
 import random
 import pygame
 
-from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, RED, NUM_LANDMARKS
+from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, NUM_LANDMARKS
 
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)
@@ -94,4 +94,5 @@ class Maze:
         for rect in self.rect_list:
             pygame.draw.rect(surface=screen, color=BLACK, rect=rect)
         for landmark in self.landmarks:
-            pygame.draw.circle(surface=screen, color=BLACK, center=landmark, radius=self.cell_size // 2)
+            pygame.draw.circle(surface=screen, color=BLACK,
+                               center=landmark, radius=self.cell_size // 2)

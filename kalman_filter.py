@@ -1,3 +1,4 @@
+# TODO: (Tiago) please do a pylint check and fix the issues in the code.
 import numpy as np
 
 class KalmanFilter:
@@ -27,7 +28,7 @@ class KalmanFilter:
         """
         # State prediction
         self.state_estimate = np.dot(self.A, self.state_estimate) + np.dot(self.B, control_vector)
-        
+
         # Covariance prediction
         self.error_covariance = np.dot(np.dot(self.A, self.error_covariance), self.A.T) + self.Q
 
@@ -37,27 +38,27 @@ class KalmanFilter:
         :param measurement_vector: The measurement input
         """
         C = self.jacobian_C(self.state_estimate, landmarks)
-        
+
         # Kalman Gain calculation
         S = np.dot(C, np.dot(self.error_covariance, C.T)) + self.R
         kalman_gain = np.dot(np.dot(self.error_covariance, C.T), np.linalg.inv(S))
-        
+
         y = measurement_vector - self.h(self.state_estimate, landmarks)
-        
+
         # State update
         self.state_estimate = self.state_estimate + np.dot(kalman_gain, y)
-        
+
         # Covariance update
         identity_matrix = np.eye(self.A.shape[0])
-        self.error_covariance = np.dot((identity_matrix - np.dot(kalman_gain, C)), self.error_covariance)
-        
+        self.error_covariance = np.dot((identity_matrix - np.dot(kalman_gain, C)),
+                                        self.error_covariance)
 
     def get_state_estimate(self):
         """
         Get the current state estimate
         """
         return self.state_estimate
-    
+
     def calculate_bearing_and_distance(self, x, y, landmark_pos):
         """
         Observation function to calculate the bearing and distance to a landmark
@@ -67,7 +68,7 @@ class KalmanFilter:
         distance = np.sqrt(dx**2 + dy**2)
         bearing = np.arctan2(dy, dx)
         return bearing, distance
-    
+
     def h(self, x, landmarks):
         """
         Define the measurement function h(x) for the Kalman Filter
@@ -82,10 +83,11 @@ class KalmanFilter:
             bearing = np.arctan2(dy, dx) - x[2]
             measurements.extend([bearing, d])
         return np.array(measurements)
-    
+
     def jacobian_C(self, x, landmarks):
         """
-        Calculate the Jacobian of the measurement function h(x) (Numerical approximation of the Jacobian)
+        Calculate the Jacobian of the measurement function h(x),
+        the Numerical approximation of the Jacobian
         """
         epsilon = 1e-5
         jac = np.zeros((2 * len(landmarks), len(x)))
@@ -96,6 +98,3 @@ class KalmanFilter:
             h_x_eps = self.h(x_eps, landmarks)
             jac[:, i] = (h_x_eps - h_x) / epsilon
         return jac
-
-    
-    

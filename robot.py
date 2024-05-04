@@ -1,13 +1,10 @@
 """robot.py: A simple robot class that can move around a maze."""
 import math
 import pygame
-import time
-import numpy as np
 
-from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE, NUM_LANDMARKS, GREEN
+from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
 from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR,SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
-from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
 
 class Robot:
@@ -41,9 +38,10 @@ class Robot:
         for i in range(NUM_SENSORS):
             sensor_angle = self.angle + i * (2 * math.pi / NUM_SENSORS)
             self.sensors[i] = self._raycast(sensor_angle + angle, 'wall')
-    
 
-    def landmark_raycast(self, screen):
+
+    def landmark_raycast(self, screen): #pylint: disable=missing-function-docstring
+        #TODO: (Lisa) add a doc string, describe the method
         for (lx, ly) in self.maze.landmarks:
             angle = math.atan2(ly - self.y, lx - self.x)
             total_distance = math.sqrt((lx - self.x) ** 2 + (ly - self.y) ** 2)
@@ -56,13 +54,15 @@ class Robot:
             dx = math.cos(angle)
             dy = math.sin(angle)
 
-            for distance in range(int(total_distance)):
+            for _ in range(int(total_distance)):
                 x += dx
                 y += dy
                 grid_x, grid_y = int(x // CELL_SIZE), int(y // CELL_SIZE)
 
                 # Check if the ray has hit a wall in the maze
-                if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1:
+                if grid_y >= len(self.maze.grid)\
+                    or grid_x >= len(self.maze.grid[0])\
+                    or self.maze.grid[grid_y][grid_x] == 1:
                     is_obstructed = True
                     break
 
@@ -73,7 +73,8 @@ class Robot:
 
     def _raycast(self, angle, obstacle_type):
         """
-        Cast a ray from the edge of the robot at a given angle to return the distance to the obstacle.
+        Cast a ray from the edge of the robot at a given angle,
+        Returns the distance to the obstacle.
         """
         # Calculate the starting point from the robot's edge in the direction of the angle
         start_x = self.x + ROBOT_RADIUS * math.cos(angle)
@@ -96,12 +97,14 @@ class Robot:
                 grid_x, grid_y = int(x // CELL_SIZE), int(y // CELL_SIZE)
 
                 # Check if the ray has hit a wall in the maze
-                if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1: #pylint: disable=line-too-long
+                if grid_y >= len(self.maze.grid)\
+                   or grid_x >= len(self.maze.grid[0])\
+                   or self.maze.grid[grid_y][grid_x] == 1:
                     return distance
 
             return SENSOR_MAX_DISTANCE
 
-        elif obstacle_type == 'landmark':
+        if obstacle_type == 'landmark':
             # Raycasting loop for landmarks
             for (lx, ly) in self.maze.landmarks:
                 l_distance = math.sqrt((lx - self.x) ** 2 + (ly - self.y) ** 2)
@@ -110,12 +113,14 @@ class Robot:
                     dy = (ly - start_y) / l_distance
 
                     ray_x, ray_y = start_x, start_y
-                    for d in range(int(l_distance)):
+                    for _ in range(int(l_distance)):
                         ray_x += dx
                         ray_y += dy
                         grid_x, grid_y = int(ray_x // CELL_SIZE), int(ray_y // CELL_SIZE)
 
-                        if grid_y >= len(self.maze.grid) or grid_x >= len(self.maze.grid[0]) or self.maze.grid[grid_y][grid_x] == 1:
+                        if grid_y >= len(self.maze.grid)\
+                           or grid_x >= len(self.maze.grid[0])\
+                           or self.maze.grid[grid_y][grid_x] == 1:
                             return SENSOR_MAX_DISTANCE
 
                     return l_distance
@@ -179,5 +184,3 @@ class Robot:
 
             pygame.draw.line(screen, sensor_color, (self.x, self.y), (end_x, end_y), 2)
             self._draw_sensor_text(screen, sensor_distance, sensor_angle)
-
-  

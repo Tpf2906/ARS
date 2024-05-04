@@ -3,7 +3,7 @@
 # pylint: disable=no-member
 import pygame
 from maze import Maze
-from maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT, BLUE
+from maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from robot import Robot
 
 
