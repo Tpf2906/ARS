@@ -34,21 +34,23 @@ class MazeGame:
             # Get the list of keys pressed
             keys = pygame.key.get_pressed()
 
-            # update left wheel
-            if keys[pygame.K_q]:
-                vl = 1
-            elif keys[pygame.K_a]:
-                vl = -1
-            else:
-                vl = 0
+            # if w is pressed, move the robot forward by 1
+            if keys[pygame.K_w]:
+                vr, vl = 1, 1
 
-            # update right wheel
-            if keys[pygame.K_e]:
-                vr = 1
-            elif keys[pygame.K_d]:
-                vr = -1
-            else:
-                vr = 0
+            # if s is pressed, move the robot backward by 1
+            elif keys[pygame.K_s]:
+                vr, vl = -1, -1
+
+            # if a is pressed, turn the robot left
+            if keys[pygame.K_a]:
+                vr += 0.5
+                vl += -0.5
+
+            # if d is pressed, turn the robot right
+            if keys[pygame.K_d]:
+                vr += -0.5
+                vl += 0.5
 
             # Move the robot
             if vr != 0 or vl != 0:
@@ -56,16 +58,19 @@ class MazeGame:
                 vl, vr = vr, vl
                 self.robot.move_with_diff_drive(vl, vr)
 
-            # draw the maze and the robot
+            # Create the speed text
+            speed_text = FONT.render(f'wheel power: {vl} | {vr}', True, WHITE)
+
+            # reset the wheel power, to avoid continuous movement
+            vr, vl = 0, 0
+
+            # draw the maze, robot and speed cltext
             self.screen.fill(WHITE)
             self.maze.draw(self.screen)
             self.robot.landmark_raycast(self.screen)
             self.robot.draw_path(self.screen)
             self.robot.update_sensors()
             self.robot.draw(self.screen)
-
-            # Display the speed of the robot (0 or 2)
-            speed_text = FONT.render(f'wheel power: {vl} | {vr}', True, WHITE)
             self.screen.blit(speed_text, (10, 10))
 
             pygame.display.flip()
