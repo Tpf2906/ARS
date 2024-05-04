@@ -4,10 +4,16 @@ import numpy as np
 import pygame
 
 from robot_config import ROBOT_RADIUS
-from collision_config import NORTH, SOUTH, EAST, WEST
+from collision_config import NORTH, SOUTH, EAST, WEST, CENTER
 
 
 L = ROBOT_RADIUS # distance between wheels
+col_dict = {
+    NORTH: "NORTH",
+    SOUTH: "SOUTH",
+    EAST: "EAST",
+    WEST: "WEST"
+}
 
 def motion_without_collison(state, d_t):
     """state change not accounting for collisions"""
@@ -75,12 +81,6 @@ def motion_with_collision(state, d_t, rectangle_list, mask: pygame.mask.Mask):
 
 def collision_type(state, rectangle_list, robot_mask: pygame.mask.Mask):
     """detect the type of collision with the maze walls"""
-    col_dict = {
-        NORTH: "NORTH",
-        SOUTH: "SOUTH",
-        EAST: "EAST",
-        WEST: "WEST"
-    }
 
     collison_list = []
     # check for collision with the maze walls
@@ -99,11 +99,17 @@ def collision_type(state, rectangle_list, robot_mask: pygame.mask.Mask):
         # check for collision from the overlap
         col_coord = robot_mask.overlap(rect_mask, (offset_x, offset_y))
 
-        if col_coord in col_dict:
-            #TODO: (Jounaid) consider snapping to the nearest cardinal direction
+        # if there is no collision, continue
+        if col_coord is None:
+            continue
+
+        # snap the collision to the nearest cardinal direction
+        if col_coord not in col_dict:
             #TODO: (Jounaid) consider using the col coord to get the angle of the colision, for non cardinal walls pylint: disable=line-too-long
-            # add the collision type to the list
-            collison_list.append(col_dict[col_coord])
+            col_coord = snap_to_cardinal(np.array(col_coord))
+
+        # add the collision to the list
+        collison_list.append(col_dict[col_coord])
 
     return collison_list
 
@@ -145,3 +151,27 @@ def wall_angle(sensors):
 
     # return index of the two sensors and the angle of the wall
     return index_a, index_b, angle_b
+
+# Function to find the closest vector
+def snap_to_cardinal(target):
+    """Snap the target vector to the closest cardinal direction"""
+    # Cardinal directions as a numpy array
+    #TODO: (Jounaid) consider making this a global variable
+    vectors = np.array(list(col_dict.keys()))
+    target = np.array(target)
+
+    # normalize vectors and target relative to CENTER as the origin
+    vectors = vectors - CENTER
+    target = target - CENTER
+
+    # Calculate distances using Euclidean norm
+    distances = [np.linalg.norm(vector - target) for vector in vectors]
+
+    # Get the index of the minimum distance
+    closest_index = np.argmin(distances)
+
+    # denormalize the closest vector
+    vector = vectors[closest_index] + CENTER
+
+    # Return the closest vector as a tuple
+    return tuple(vector)
