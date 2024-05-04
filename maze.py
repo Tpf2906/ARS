@@ -1,8 +1,11 @@
 """module containing code to generate a maze and draw it on the screen"""
+
+from typing import List
+
 import random
 import pygame
 
-from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, NUM_LANDMARKS
+from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, NUM_LANDMARKS, LANDMARK_COLOR
 
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)
@@ -16,7 +19,7 @@ class Maze:
         self.cols = self.width // self.cell_size
         self.rows = self.height // self.cell_size
         self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
-        self.rect_list = [] # List to store the pygame rectangles for the maze
+        self.rect_list : List[Maze] = [] # List to store the pygame rectangles for the maze
         self.landmarks = [] # List to store the pygame circles for the landmarks
 
         self.dfs(1, 1)
@@ -94,5 +97,5 @@ class Maze:
         for rect in self.rect_list:
             pygame.draw.rect(surface=screen, color=BLACK, rect=rect)
         for landmark in self.landmarks:
-            pygame.draw.circle(surface=screen, color=BLACK,
-                               center=landmark, radius=self.cell_size // 2)
+            pygame.draw.circle(surface=screen, color = LANDMARK_COLOR,
+                               center=landmark, radius=self.cell_size // 4)

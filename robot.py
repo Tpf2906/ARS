@@ -3,6 +3,7 @@ import math
 import pygame
 import numpy as np
 
+from maze import Maze
 from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
 from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
@@ -12,13 +13,13 @@ from forward_kin import motion_with_collision
 class Robot:
     """Robot with sensors to navigate and sense the maze."""
 
-    def __init__(self, maze, start_pos):
+    def __init__(self, maze: Maze, start_pos):
         """
         Initialize the robot.
         :param maze: Maze object which the robot will navigate.
         :param start_pos: Tuple (x, y) for the starting position of the robot.
         """
-        self.maze = maze
+        self.maze : Maze = maze
         self.x, self.y = start_pos
         self.sensors = [0] * NUM_SENSORS
         self.angle = 0
@@ -173,11 +174,27 @@ class Robot:
         measurement_vector = []
 
         for (lx, ly) in self.maze.landmarks:
+            # check if a wall is obstructing the line of sight to the landmark
+            line_of_sight = True
+            for wall in self.maze.rect_list:
+                if wall.clipline((self.x, self.y), (lx, ly)):
+                    line_of_sight = False
+                    break
+
+            # calculate the bearing and distance to the landmark
             dx = lx - self.x
             dy = ly - self.y
             distance = np.sqrt(dx ** 2 + dy ** 2)
             bearing = np.arctan2(dy, dx) - self.angle
-            measurement_vector.extend([bearing, distance])
+
+            # if there is a line of sight add the bearing and distance to the measurement vector
+            if line_of_sight:
+                measurement_vector.extend([bearing, distance])
+
+            else:
+                #TODO: instead send a random bearing and distance, but with high uncertainty
+                # if there is no line of sight to the landmark
+                measurement_vector.extend([bearing, distance])
 
         measurement_vector = np.array(measurement_vector)
 
