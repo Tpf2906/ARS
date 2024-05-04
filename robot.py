@@ -1,10 +1,12 @@
 """robot.py: A simple robot class that can move around a maze."""
 import math
 import pygame
+import numpy as np
 
 from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
-from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR,SENSOR_COLOR_LANDMARK,
+from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
+from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
 
 class Robot:
@@ -23,17 +25,31 @@ class Robot:
         self.prev_x, self.prev_y = 0, 0
         self.mask = self._make_mask()
         self.past_positions = [(self.x, self.y)]
+        self.estimated_positions = [(self.x, self.y)]# Store estimated positions for drawing later
+
+        #TODO: (Tiago) please fix the naming convention
+        #pylint: disable=invalid-name
+        # Initialize the Kalman filter
+        A = np.eye(3)
+        B = np.zeros((3, 2))
+        C = None  # Will be defined dynamically in the Kalman filter class
+        Q = np.diag([0.01, 0.01, 0.01])
+        R = np.diag([0.1, 0.1] * len(maze.landmarks))
+        x = np.array([self.x, self.y, self.angle])
+        P = np.eye(3)
+
+        self.kalman_filter = KalmanFilter(A, B, C, Q, R, x, P)
+        #pylint: enable=invalid-name
 
     def _make_mask(self):
         """Create a mask for the robot."""
-        dot_surface = pygame.Surface((ROBOT_RADIUS*2, ROBOT_RADIUS*2), pygame.SRCALPHA) #pylint: disable=no-member
+        dot_surface = pygame.Surface((ROBOT_RADIUS * 2, ROBOT_RADIUS * 2), pygame.SRCALPHA) #pylint: disable=no-member
         pygame.draw.circle(dot_surface, SENSOR_COLOR, (ROBOT_RADIUS, ROBOT_RADIUS), ROBOT_RADIUS)
         dot_mask = pygame.mask.from_surface(dot_surface)
 
         return dot_mask
 
-    #TODO: (Jounaid) consider variable framerate based on distance
-    def update_sensors(self, angle = 0):
+    def update_sensors(self, angle=0):
         """Update the sensor readings based on the robot's current position."""
         for i in range(NUM_SENSORS):
             sensor_angle = self.angle + i * (2 * math.pi / NUM_SENSORS)
@@ -70,11 +86,10 @@ class Robot:
                 pygame.draw.line(screen, SENSOR_COLOR_LANDMARK, (self.x, self.y), (lx, ly), 2)
                 self._draw_sensor_text(screen, total_distance, angle)
 
-
     def _raycast(self, angle, obstacle_type):
         """
-        Cast a ray from the edge of the robot at a given angle,
-        Returns the distance to the obstacle.
+        Cast a ray from the edge of the robot at a given angle.
+        Return the distance to the obstacle.
         """
         # Calculate the starting point from the robot's edge in the direction of the angle
         start_x = self.x + ROBOT_RADIUS * math.cos(angle)
@@ -128,32 +143,57 @@ class Robot:
 
             return SENSOR_MAX_DISTANCE
 
-
     def move_with_diff_drive(self, vl, vr):
         """Move the robot with differential drive control."""
-
-        # create state vector
+        # Create state vector
         state = [self.x, self.y, self.angle, vl, vr]
 
-        # update the state
+        # Update the state
         new_state = motion_with_collision(state, 1, self.maze.rect_list, self.mask)
 
-        # update the robot's position
+        # Update the robot's position
         self.x, self.y, self.angle = new_state[0], new_state[1], new_state[2]
 
         # Add the current position to past positions
         self.past_positions.append((self.x, self.y))
 
-        # check for collision with the outer edges of the window
+        # Check for collision with the outer edges of the window
         self.x = max(self.x, ROBOT_RADIUS)
         self.y = max(self.y, ROBOT_RADIUS)
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
         self.y = min(self.y, HEIGHT - ROBOT_RADIUS)
 
+        # Kalman filter predict and correct steps
+        control_vector = np.array([vl, vr])
+        self.kalman_filter.predict(control_vector)
+
+        # Update measurement_vector with actual landmark data
+        measurement_vector = []
+
+        for (lx, ly) in self.maze.landmarks:
+            dx = lx - self.x
+            dy = ly - self.y
+            distance = np.sqrt(dx ** 2 + dy ** 2)
+            bearing = np.arctan2(dy, dx) - self.angle
+            measurement_vector.extend([bearing, distance])
+
+        measurement_vector = np.array(measurement_vector)
+
+        # Correct step in Kalman filter
+        self.kalman_filter.correct(measurement_vector, self.maze.landmarks)
+
+        # Store estimated positions for drawing
+        estimated_position = self.kalman_filter.get_state_estimate()
+        self.estimated_positions.append((estimated_position[0], estimated_position[1]))
+
+
     def draw_path(self, screen):
         """Draw the robot's path on the screen."""
         if len(self.past_positions) > 1:
             pygame.draw.lines(screen, BLUE, False, self.past_positions, 2)  # Draw path in blue
+
+        if len(self.estimated_positions) > 1:
+            pygame.draw.lines(screen, (255, 255, 0), False, self.estimated_positions, 2)  # Draw estimated path in yellow pylint: disable=line-too-long
 
     def _draw_sensor_text(self, screen, sensor_distance, angle, distance_multiplier=1.1):
         """
@@ -175,8 +215,9 @@ class Robot:
         # Sensor that should be highlighted is the one aligned with the angle
         for i, sensor_distance in enumerate(self.sensors):
             sensor_angle = self.angle + i * (2 * math.pi / NUM_SENSORS)
-            end_x = self.x + sensor_distance * math.cos(sensor_angle) + ROBOT_RADIUS * math.cos(sensor_angle) #pylint: disable=line-too-long
-            end_y = self.y + sensor_distance * math.sin(sensor_angle) + ROBOT_RADIUS * math.sin(sensor_angle) #pylint: disable=line-too-long
+            end_x = self.x + sensor_distance * math.cos(sensor_angle) + ROBOT_RADIUS * math.cos(sensor_angle) # pylint: disable=line-too-long
+            end_y = self.y + sensor_distance * math.sin(sensor_angle) + ROBOT_RADIUS * math.sin(sensor_angle) # pylint: disable=line-too-long
+
             # Forward sensor direction check
             if i == 0:  # Assuming forward direction is index 0 after the angle correction
                 sensor_color = (255, 0, 255)  # Purple for forward direction
