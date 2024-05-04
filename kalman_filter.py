@@ -1,6 +1,7 @@
 # TODO: (Tiago) please do a pylint check and fix the issues in the code.
 # remove the next line to see the pylint issues
 # pylint: disable=invalid-name
+# pylint: disable=missing-class-docstring
 import numpy as np
 
 class KalmanFilter:
@@ -15,6 +16,7 @@ class KalmanFilter:
         :param x: Initial state estimate
         :param P: Initial error covariance
         """
+        #TODO: (Tiago) rename the variables to be more descriptive?
         self.A = A  # State transition matrix
         self.B = B  # Control-input matrix
         self.C = C  # Observation matrix
@@ -24,6 +26,7 @@ class KalmanFilter:
         self.error_covariance = P  # Error covariance matrix
 
     def predict(self, control_vector):
+        #TODO: (Tiago) please define what variable in the vector means
         """
         Prediction step of the Kalman Filter
         :param control_vector: The control input
@@ -55,6 +58,7 @@ class KalmanFilter:
         self.error_covariance = np.dot((identity_matrix - np.dot(kalman_gain, C)),
                                         self.error_covariance)
 
+    #TODO: remove this method
     def get_state_estimate(self):
         """
         Get the current state estimate
@@ -71,6 +75,8 @@ class KalmanFilter:
         bearing = np.arctan2(dy, dx)
         return bearing, distance
 
+    #TODO: rename this method to something more descriptive
+    #TODO: rename variable x?
     def h(self, x, landmarks):
         """
         Define the measurement function h(x) for the Kalman Filter
