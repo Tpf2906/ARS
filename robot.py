@@ -56,8 +56,8 @@ class Robot:
             self.sensors[i] = self._raycast(sensor_angle + angle, 'wall')
 
 
-    def landmark_raycast(self, screen): #pylint: disable=missing-function-docstring
-        #TODO: (Lisa) add a doc string, describe the method
+    def draw_landmark_raycast(self, screen): #pylint: disable=missing-function-docstring
+        #TODO: (Tiago) add a doc string, describe the method
         for (lx, ly) in self.maze.landmarks:
             angle = math.atan2(ly - self.y, lx - self.x)
             total_distance = math.sqrt((lx - self.x) ** 2 + (ly - self.y) ** 2)

@@ -68,7 +68,7 @@ class MazeGame:
             # draw the maze, robot and speed cltext
             self.screen.fill(WHITE)
             self.maze.draw(self.screen)
-            self.robot.landmark_raycast(self.screen)
+            self.robot.draw_landmark_raycast(self.screen)
             self.robot.draw_path(self.screen)
             self.robot.update_sensors()
             self.robot.draw(self.screen)
