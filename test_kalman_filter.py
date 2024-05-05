@@ -35,7 +35,7 @@ class TestKalmanFilter(unittest.TestCase):
         # correction step
         self.kf.correct(measurements, self.landmarks)
 
-        estimated_state = self.kf.get_state_estimate()
+        estimated_state = self.kf.state_estimate()
         print("Estimated state:", estimated_state)
         self.assertTrue(np.allclose(estimated_state, np.array([1, 0.1, 0.05]), atol=1e-2))
 
