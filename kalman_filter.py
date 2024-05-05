@@ -55,9 +55,11 @@ class KalmanFilter:
         state = np.dot(observation_matrix, np.dot(
             self.error_covariance, observation_matrix.T)
                        ) + self.noise_covariance_measurement
+        
         kalman_gain = np.dot(np.dot(
             self.error_covariance, observation_matrix.T
             ), np.linalg.inv(state))
+        
         y = measurement_vector - self.h(self.state_estimate, landmarks)
 
         # State update

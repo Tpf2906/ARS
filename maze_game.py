@@ -2,6 +2,8 @@
 # disabling pylint no-member error for pygame
 # pylint: disable=no-member
 import pygame
+import random
+
 from maze import Maze
 from maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from robot import Robot
@@ -27,6 +29,7 @@ class MazeGame:
         """Run the main game loop."""
         running = True
         vr, vl = 0, 0
+        counter = 0
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -56,8 +59,17 @@ class MazeGame:
             if vr != 0 or vl != 0:
                 # invert the controls, pygame treats the y axis as inverted
                 vl, vr = vr, vl
-                self.robot.move_with_diff_drive(vl, vr)
-                self.robot.run_kalman_filter(vl, vr)
+
+                # genrate random noise for the wheel powerbetween -0.1 and 0.1
+                vl_noise = random.uniform(-0.2, 0.2)
+                vr_noise = random.uniform(-0.2, 0.2)
+
+                # move the robot with the diff drive model
+                self.robot.move_with_diff_drive(vl + vl_noise, vr + vr_noise)
+
+                if counter % 30 == 0:
+                    # run the kalman filter
+                    self.robot.run_kalman_filter(vl, vr)
 
             # Create the speed text
             speed_text = FONT.render(f'wheel power: {vl} | {vr}', True, WHITE)
@@ -76,6 +88,7 @@ class MazeGame:
 
             pygame.display.flip()
             self.clock.tick(60)
+            counter += 1
 
         pygame.quit()
 

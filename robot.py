@@ -33,7 +33,6 @@ class Robot:
         self.past_positions = [(self.x, self.y)]
         self.estimated_positions = [(self.x, self.y)] # Store estimated positions for drawing later
 
-        #pylint: disable=invalid-name
         # Initialize the Kalman filter
         state_transition_matrix = np.eye(3)
         control_input_matrix = np.zeros((3, 2))
@@ -197,8 +196,8 @@ class Robot:
 
         # Update measurement_vector with actual landmark data
         measurement_vector = []
-
-        for (lx, ly) in self.maze.landmarks:
+        counter = 0
+        for i, (lx, ly) in enumerate(self.maze.landmarks):
             # check if a wall is obstructing the line of sight to the landmark
             line_of_sight = True
             for wall in self.maze.rect_list:
@@ -214,13 +213,25 @@ class Robot:
 
             # if there is a line of sight add the bearing and distance to the measurement vector
             if line_of_sight:
+                # add the bearing and distance to the measurement vector
                 measurement_vector.extend([bearing, distance])
+                counter += 1
+
+                # set default uncertainty for the measurement
+                self.kalman_filter.noise_covariance_measurement[i][i] = 0.0000000001
+                self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = 0.0000000001
 
             else:
                 #TODO: instead send a random bearing and distance, but with high uncertainty
                 # if there is no line of sight to the landmark
+                random_bearing = np.random.uniform(-np.pi, np.pi)
+                random_distance = np.random.uniform(0, SENSOR_MAX_DISTANCE)
                 measurement_vector.extend([bearing, distance])
 
+                # Add high uncertainty to the measurement
+                self.kalman_filter.noise_covariance_measurement[i][i] = 1
+                self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = 1
+        print (f"counter: {counter}")
         measurement_vector = np.array(measurement_vector)
 
         # Correct step in Kalman filter
