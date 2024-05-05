@@ -1,17 +1,22 @@
-"""robot.py: A simple robot class that can move around a maze."""
+"""
+robot.py: A simple robot class that can move around a maze.
+"""
+
 import math
 import pygame
 import numpy as np
-
 from maze import Maze
 from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
 from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
-                          TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE)
+                          TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE, SENSOR_COLOR_FORWARD)
 from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
 
+
 class Robot:
-    """Robot with sensors to navigate and sense the maze."""
+    """
+    Robot with sensors to navigate and sense the maze.
+    """
 
     def __init__(self, maze: Maze, start_pos):
         """
@@ -26,39 +31,47 @@ class Robot:
         self.prev_x, self.prev_y = 0, 0
         self.mask = self._make_mask()
         self.past_positions = [(self.x, self.y)]
-        self.estimated_positions = [(self.x, self.y)]# Store estimated positions for drawing later
+        self.estimated_positions = [(self.x, self.y)] # Store estimated positions for drawing later
 
-        #TODO: (Tiago) please fix the naming convention
         #pylint: disable=invalid-name
         # Initialize the Kalman filter
-        A = np.eye(3)
-        B = np.zeros((3, 2))
-        C = None  # Will be defined dynamically in the Kalman filter class
-        Q = np.diag([0.01, 0.01, 0.01])
-        R = np.diag([0.1, 0.1] * len(maze.landmarks))
-        x = np.array([self.x, self.y, self.angle])
-        P = np.eye(3)
+        state_transition_matrix = np.eye(3)
+        control_input_matrix = np.zeros((3, 2))
+        observation_matrix = None  # Will be defined dynamically in the Kalman filter class
+        noise_covariance = np.diag([0.01, 0.01, 0.01])
+        noise_covariance_measurement = np.diag([0.1, 0.1] * len(maze.landmarks))
+        state_estimate = np.array([self.x, self.y, self.angle])
+        error_covariance = np.eye(3)
 
-        self.kalman_filter = KalmanFilter(A, B, C, Q, R, x, P)
+        self.kalman_filter = KalmanFilter(state_transition_matrix, control_input_matrix,
+                                          observation_matrix, noise_covariance,
+                                          noise_covariance_measurement, state_estimate,
+                                          error_covariance)
         #pylint: enable=invalid-name
 
+
     def _make_mask(self):
-        """Create a mask for the robot."""
+        """
+        Create a mask for the robot.
+        """
         dot_surface = pygame.Surface((ROBOT_RADIUS * 2, ROBOT_RADIUS * 2), pygame.SRCALPHA) #pylint: disable=no-member
         pygame.draw.circle(dot_surface, SENSOR_COLOR, (ROBOT_RADIUS, ROBOT_RADIUS), ROBOT_RADIUS)
         dot_mask = pygame.mask.from_surface(dot_surface)
 
         return dot_mask
 
+
     def update_sensors(self, angle=0):
-        """Update the sensor readings based on the robot's current position."""
+        """
+        Update the sensor readings based on the robot's current position.
+        """
         for i in range(NUM_SENSORS):
             sensor_angle = self.angle + i * (2 * math.pi / NUM_SENSORS)
             self.sensors[i] = self._raycast(sensor_angle + angle, 'wall')
 
 
-    def draw_landmark_raycast(self, screen): #pylint: disable=missing-function-docstring
-        #TODO: (Tiago) add a doc string, describe the method
+    def draw_landmark_raycast(self, screen):
+        """Draw the raycast to the landmarks on the screen."""
         for (lx, ly) in self.maze.landmarks:
             angle = math.atan2(ly - self.y, lx - self.x)
             total_distance = math.sqrt((lx - self.x) ** 2 + (ly - self.y) ** 2)
@@ -87,6 +100,19 @@ class Robot:
                 pygame.draw.line(screen, SENSOR_COLOR_LANDMARK, (self.x, self.y), (lx, ly), 2)
                 self._draw_sensor_text(screen, total_distance, angle)
 
+
+    def _check_wall_collision(self, grid_x, grid_y):
+        """
+        Check if a given grid coordinate has collided with a wall in the maze.
+        :param grid_x: The x-coordinate of the grid.
+        :param grid_y: The y-coordinate of the grid.
+        :return: True if there is a collision with a wall, otherwise False.
+        """
+        return grid_y >= len(self.maze.grid)\
+               or grid_x >= len(self.maze.grid[0])\
+               or self.maze.grid[grid_y][grid_x] == 1
+
+
     def _raycast(self, angle, obstacle_type):
         """
         Cast a ray from the edge of the robot at a given angle.
@@ -111,12 +137,7 @@ class Robot:
                 y += dy
                 distance += 1
                 grid_x, grid_y = int(x // CELL_SIZE), int(y // CELL_SIZE)
-
-                # Check if the ray has hit a wall in the maze
-                #TODO: (Lisa) this check is used at least three times, abstract to own function
-                if grid_y >= len(self.maze.grid)\
-                   or grid_x >= len(self.maze.grid[0])\
-                   or self.maze.grid[grid_y][grid_x] == 1:
+                if self._check_wall_collision(grid_x, grid_y):
                     return distance
 
             return SENSOR_MAX_DISTANCE
@@ -135,17 +156,18 @@ class Robot:
                         ray_y += dy
                         grid_x, grid_y = int(ray_x // CELL_SIZE), int(ray_y // CELL_SIZE)
 
-                        if grid_y >= len(self.maze.grid)\
-                           or grid_x >= len(self.maze.grid[0])\
-                           or self.maze.grid[grid_y][grid_x] == 1:
+                        if self._check_wall_collision(grid_x, grid_y):
                             return SENSOR_MAX_DISTANCE
 
                     return l_distance
 
             return SENSOR_MAX_DISTANCE
 
+
     def move_with_diff_drive(self, vl, vr):
-        """Move the robot with differential drive control."""
+        """
+        Move the robot with differential drive control.
+        """
         # Create state vector
         state = [self.x, self.y, self.angle, vl, vr]
 
@@ -164,8 +186,11 @@ class Robot:
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
         self.y = min(self.y, HEIGHT - ROBOT_RADIUS)
 
+
     def run_kalman_filter(self, vl, vr):
-        """Run the Kalman filter to estimate the robot's position."""
+        """
+        Run the Kalman filter to estimate the robot's position.
+        """
         # Kalman filter predict and correct steps
         control_vector = np.array([vl, vr])
         self.kalman_filter.predict(control_vector)
@@ -202,17 +227,20 @@ class Robot:
         self.kalman_filter.correct(measurement_vector, self.maze.landmarks)
 
         # Store estimated positions for drawing
-        estimated_position = self.kalman_filter.get_state_estimate()
+        estimated_position = self.kalman_filter.state_estimate
         self.estimated_positions.append((estimated_position[0], estimated_position[1]))
 
 
     def draw_path(self, screen):
-        """Draw the robot's path on the screen."""
+        """
+        Draw the robot's path on the screen.
+        """
         if len(self.past_positions) > 1:
             pygame.draw.lines(screen, BLUE, False, self.past_positions, 2)  # Draw path in blue
 
         if len(self.estimated_positions) > 1:
             pygame.draw.lines(screen, (255, 255, 0), False, self.estimated_positions, 2)  # Draw estimated path in yellow pylint: disable=line-too-long
+
 
     def _draw_sensor_text(self, screen, sensor_distance, angle, distance_multiplier=1.1):
         """
@@ -227,8 +255,11 @@ class Robot:
         text_surface = FONT.render(str(int(sensor_distance)), True, TEXT_COLOR)
         screen.blit(text_surface, (end_x, end_y))
 
+
     def draw(self, screen):
-        """Draw the robot on the screen."""
+        """
+        Draw the robot on the screen. 
+        """
         pygame.draw.circle(screen, ROBOT_COLOR, (int(self.x), int(self.y)), ROBOT_RADIUS)
 
         # Sensor that should be highlighted is the one aligned with the angle
@@ -238,8 +269,8 @@ class Robot:
             end_y = self.y + sensor_distance * math.sin(sensor_angle) + ROBOT_RADIUS * math.sin(sensor_angle) # pylint: disable=line-too-long
 
             # Forward sensor direction check
-            if i == 0:  # Assuming forward direction is index 0 after the angle correction
-                sensor_color = (255, 0, 255)  # Purple for forward direction
+            if i == 0:
+                sensor_color = SENSOR_COLOR_FORWARD
             else:
                 sensor_color = SENSOR_COLOR
 

@@ -1,69 +1,73 @@
-# TODO: (Tiago) please do a pylint check and fix the issues in the code.
-# remove the next line to see the pylint issues
-# pylint: disable=invalid-name
-# pylint: disable=missing-class-docstring
+"""
+kalman_filter.py: Class to calculate the Kalman filter.
+"""
+
 import numpy as np
 
 class KalmanFilter:
-    def __init__(self, A, B, C, Q, R, x, P):
+    """
+    Kalman Filter with initializations.
+    """
+    def __init__(self, state_transition_matrix, control_input_matrix, observation_matrix,
+                 noise_covariance, noise_covariance_measurement, state_estimate, error_covariance):
         """
         Initialize the Kalman Filter
-        :param A: Transition matrix
-        :param B: Control-input matrix
-        :param C: Observation matrix
-        :param Q: Process noise covariance
-        :param R: Measurement noise covariance
-        :param x: Initial state estimate
-        :param P: Initial error covariance
+        :param state_transition_matrix: Transition matrix
+        :param control_input_matrix: Control-input matrix
+        :param observation_matrix: Observation matrix
+        :param noise_covariance: Process noise covariance
+        :param noise_covariance_measurement: Measurement noise covariance
+        :param state_estimate: Initial state estimate
+        :param error_covariance: Initial error covariance
         """
-        #TODO: (Tiago) rename the variables to be more descriptive?
-        self.A = A  # State transition matrix
-        self.B = B  # Control-input matrix
-        self.C = C  # Observation matrix
-        self.Q = Q  # Process noise covariance
-        self.R = R  # Measurement noise covariance
-        self.state_estimate = x  # State estimate vector
-        self.error_covariance = P  # Error covariance matrix
+        self.state_transition_matrix = state_transition_matrix # A
+        self.control_input_matrix = control_input_matrix  # B
+        self.observation_matrix = observation_matrix  # C
+        self.noise_covariance = noise_covariance  # Q
+        self.noise_covariance_measurement = noise_covariance_measurement  # R
+        self.state_estimate = state_estimate  # x
+        self.error_covariance = error_covariance  # P
+
 
     def predict(self, control_vector):
-        #TODO: (Tiago) please define what variable in the vector means
         """
         Prediction step of the Kalman Filter
         :param control_vector: The control input
         """
         # State prediction
-        self.state_estimate = np.dot(self.A, self.state_estimate) + np.dot(self.B, control_vector)
-
+        self.state_estimate = np.dot(
+            self.state_transition_matrix, self.state_estimate
+            ) + np.dot(self.control_input_matrix, control_vector)
         # Covariance prediction
-        self.error_covariance = np.dot(np.dot(self.A, self.error_covariance), self.A.T) + self.Q
+        self.error_covariance = np.dot(np.dot(
+            self.state_transition_matrix, self.error_covariance
+            ), self.state_transition_matrix.T) + self.noise_covariance
+
 
     def correct(self, measurement_vector, landmarks):
         """
         Correction step of the Kalman Filter
         :param measurement_vector: The measurement input
         """
-        C = self.jacobian_C(self.state_estimate, landmarks)
+        observation_matrix = self.jacobian_c(self.state_estimate, landmarks)
 
         # Kalman Gain calculation
-        S = np.dot(C, np.dot(self.error_covariance, C.T)) + self.R
-        kalman_gain = np.dot(np.dot(self.error_covariance, C.T), np.linalg.inv(S))
-
+        state = np.dot(observation_matrix, np.dot(
+            self.error_covariance, observation_matrix.T)
+                       ) + self.noise_covariance_measurement
+        kalman_gain = np.dot(np.dot(
+            self.error_covariance, observation_matrix.T
+            ), np.linalg.inv(state))
         y = measurement_vector - self.h(self.state_estimate, landmarks)
 
         # State update
         self.state_estimate = self.state_estimate + np.dot(kalman_gain, y)
 
         # Covariance update
-        identity_matrix = np.eye(self.A.shape[0])
-        self.error_covariance = np.dot((identity_matrix - np.dot(kalman_gain, C)),
+        identity_matrix = np.eye(self.state_transition_matrix.shape[0])
+        self.error_covariance = np.dot((identity_matrix - np.dot(kalman_gain, observation_matrix)),
                                         self.error_covariance)
 
-    #TODO: remove this method
-    def get_state_estimate(self):
-        """
-        Get the current state estimate
-        """
-        return self.state_estimate
 
     def calculate_bearing_and_distance(self, x, y, landmark_pos):
         """
@@ -75,33 +79,33 @@ class KalmanFilter:
         bearing = np.arctan2(dy, dx)
         return bearing, distance
 
-    #TODO: rename this method to something more descriptive
-    #TODO: rename variable x?
-    def h(self, x, landmarks):
+
+    def h(self, state_vector, landmarks):
         """
         Define the measurement function h(x) for the Kalman Filter
-        x: state vector [x, y, theta]
+        state_vector: state vector with 3 dimensionalities: [x, y, theta]
         landmarks: list of landmark positions [(x_l1, y_l1), (x_l2, y_l2), ...]
         """
         measurements = []
         for (x_l, y_l) in landmarks:
-            dx = x_l - x[0]
-            dy = y_l - x[1]
+            dx = x_l - state_vector[0]
+            dy = y_l - state_vector[1]
             d = np.sqrt(dx**2 + dy**2)
-            bearing = np.arctan2(dy, dx) - x[2]
+            bearing = np.arctan2(dy, dx) - state_vector[2]
             measurements.extend([bearing, d])
         return np.array(measurements)
 
-    def jacobian_C(self, x, landmarks):
+
+    def jacobian_c(self, state_vector, landmarks):
         """
         Calculate the Jacobian of the measurement function h(x),
         the Numerical approximation of the Jacobian
         """
         epsilon = 1e-5
-        jac = np.zeros((2 * len(landmarks), len(x)))
-        h_x = self.h(x, landmarks)
-        for i in range(len(x)):
-            x_eps = np.copy(x)
+        jac = np.zeros((2 * len(landmarks), len(state_vector)))
+        h_x = self.h(state_vector, landmarks)
+        for i in range(len(state_vector)):
+            x_eps = np.copy(state_vector)
             x_eps[i] += epsilon
             h_x_eps = self.h(x_eps, landmarks)
             jac[:, i] = (h_x_eps - h_x) / epsilon
