@@ -11,6 +11,7 @@ from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE, SENSOR_COLOR_FORWARD)
 from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
+import matplotlib.pyplot as plt
 
 
 class Robot:
@@ -287,3 +288,34 @@ class Robot:
 
             pygame.draw.line(screen, sensor_color, (self.x, self.y), (end_x, end_y), 2)
             self._draw_sensor_text(screen, sensor_distance, sensor_angle)
+    
+    def plot_error(self):
+        """
+        Plot the log difference between every 30th updated estimated position and the past positions.
+        """
+        # Indices that correspond to the estimated updates
+        update_interval = 30
+        indices = np.arange(0, len(self.past_positions), update_interval)
+
+        # Use only those indices to fetch past and estimated positions
+        past_indices = [self.past_positions[i] for i in indices]
+        estimated_indices = [self.estimated_positions[i // update_interval] for i in indices]
+
+        # Convert lists of tuples to numpy arrays for vectorized operations
+        past = np.array(past_indices)
+        estimated = np.array(estimated_indices)
+
+        # Compute the squared differences for each coordinate
+        squared_errors = np.sum((past - estimated) ** 2, axis=1)
+
+        log_errors = np.log(squared_errors + 1)
+
+        # Plot the squared errors
+        plt.figure(figsize=(10, 6))
+        plt.plot(indices, log_errors, label='Log Error')
+        plt.xlabel('Index')
+        plt.ylabel('Squared Error')
+        plt.title('Kalman Filter Squared Error (Every 30th Position)')
+        plt.legend()
+        plt.grid(True)
+        plt.show()

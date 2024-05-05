@@ -9,6 +9,7 @@ from maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from robot import Robot
 
 
+
 class MazeGame:
     """Handle game initialization and the main game loop."""
 
@@ -95,3 +96,4 @@ class MazeGame:
 if __name__ == "__main__":
     game = MazeGame()
     game.run()
+    game.robot.plot_error()
