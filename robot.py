@@ -213,10 +213,13 @@ class Robot:
             distance = np.sqrt(dx ** 2 + dy ** 2)
             bearing = np.arctan2(dy, dx) - self.angle
 
+            # add the bearing and distance to the measurement vector
+            measurement_vector.extend([bearing, distance])
+
+
             # if there is a line of sight add the bearing and distance to the measurement vector
             if line_of_sight:
-                # add the bearing and distance to the measurement vector
-                measurement_vector.extend([bearing, distance])
+                # increment the counter, beacon is visible
                 counter += 1
 
                 # set default uncertainty for the measurement
@@ -224,11 +227,6 @@ class Robot:
                 self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = 0.0000000001
 
             else:
-                #TODO: instead send a random bearing and distance, but with high uncertainty
-                # if there is no line of sight to the landmark
-                random_bearing = np.random.uniform(-np.pi, np.pi)
-                random_distance = np.random.uniform(0, SENSOR_MAX_DISTANCE)
-                measurement_vector.extend([bearing, distance])
 
                 # Add high uncertainty to the measurement
                 self.kalman_filter.noise_covariance_measurement[i][i] = 1
