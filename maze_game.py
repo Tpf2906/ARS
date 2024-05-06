@@ -20,16 +20,17 @@ class MazeGame:
         self.clock = pygame.time.Clock()
         self.maze = Maze(WIDTH, HEIGHT, CELL_SIZE)
 
-        self.robot = Robot(self.maze, (CELL_SIZE * 1.5, CELL_SIZE * 1.5))  # Starting the robot in the first cell, pylint: disable=line-too-long
+        self.robot = Robot(self.maze, (CELL_SIZE * 1.5, CELL_SIZE * 1.5))
         self.moving_up = False
         self.moving_down = False
         self.moving_left = False
         self.moving_right = False
 
+        self.wheel_noise = 1
+
     def run(self):
         """Run the main game loop."""
         running = True
-        vr, vl = 0, 0
         counter = 0
         while running:
             for event in pygame.event.get():
@@ -38,32 +39,15 @@ class MazeGame:
             # Get the list of keys pressed
             keys = pygame.key.get_pressed()
 
-            # if w is pressed, move the robot forward by 1
-            if keys[pygame.K_w]:
-                vr, vl = 1, 1
-
-            # if s is pressed, move the robot backward by 1
-            elif keys[pygame.K_s]:
-                vr, vl = -1, -1
-
-            # if a is pressed, turn the robot left
-            if keys[pygame.K_a]:
-                vr += 0.5
-                vl += -0.5
-
-            # if d is pressed, turn the robot right
-            if keys[pygame.K_d]:
-                vr += -0.5
-                vl += 0.5
+            # Handle the controls
+            vr, vl = self.handle_controls(keys)
 
             # Move the robot
             if vr != 0 or vl != 0:
-                # invert the controls, pygame treats the y axis as inverted
-                vl, vr = vr, vl
 
                 # genrate random noise for the wheel powerbetween -0.1 and 0.1
-                vl_noise = random.uniform(-0.2, 0.2)
-                vr_noise = random.uniform(-0.2, 0.2)
+                vl_noise = random.uniform(-0.2, 0.2) * self.wheel_noise
+                vr_noise = random.uniform(-0.2, 0.2) * self.wheel_noise
 
                 # move the robot with the diff drive model
                 self.robot.move_with_diff_drive(vl + vl_noise, vr + vr_noise)
@@ -92,7 +76,34 @@ class MazeGame:
             counter += 1
 
         pygame.quit()
+    def handle_controls(self, keys):
+        """Handle the controls for the robot."""
+        # set the wheel power to 0
+        vr, vl = 0, 0
 
+        # if w is pressed, move the robot forward by 1
+        if keys[pygame.K_w]:
+            vr, vl = 1, 1
+
+        # if s is pressed, move the robot backward by 1
+        elif keys[pygame.K_s]:
+            vr, vl = -1, -1
+
+        # if a is pressed, turn the robot left
+        if keys[pygame.K_a]:
+            vr += 0.5
+            vl += -0.5
+
+        # if d is pressed, turn the robot right
+        if keys[pygame.K_d]:
+            vr += -0.5
+            vl += 0.5
+
+        # invert the controls, pygame treats the y axis as inverted
+        vl, vr = vr, vl
+
+        return vr, vl
+        
 if __name__ == "__main__":
     game = MazeGame()
     game.run()
