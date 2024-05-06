@@ -5,6 +5,7 @@ import pygame
 import pygame_gui
 from maze import Maze
 from config.maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
+from config.robot_config import ROBOT_SPEED
 from robot import Robot
 
 
@@ -26,6 +27,11 @@ class MazeGame:
         self.moving_right = False
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
         self.setup_gui()
+        self.gui_changes = {
+            "sensor_noise": [self.robot.sensor_noise],
+            "wheel_noise": [self.robot.wheel_noise],
+            "kalman_interval": [],
+        }
 
 
     def setup_gui(self):
@@ -215,6 +221,16 @@ class MazeGame:
                     # run the kalman filter
                     self.robot.run_kalman_filter(vl, vr)
 
+                    # store the sensor noise for plotting
+                    self.gui_changes["sensor_noise"].append(self.robot.sensor_noise)
+
+                    # store the wheel noise for plotting
+                    self.gui_changes["wheel_noise"].append(self.robot.wheel_noise)
+
+                    #TODO fix so that kalman interval can be changed during runtime, ploting is breaking
+                    # store the kalman interval for plotting
+                    #self.gui_changes["kalman_interval"].append(self.robot.kalman_call_interval)
+
             # create the speed text
             speed_text = FONT.render(f'wheel power: {vl} | {vr}', True, WHITE)
 
@@ -263,11 +279,28 @@ class MazeGame:
             vl += 0.5
 
         # invert the controls, pygame treats the y axis as inverted
-        vl, vr = vr, vl
+        vl, vr = vr * ROBOT_SPEED , vl * ROBOT_SPEED
 
         return vr, vl
-        
+    
+def plot_extra_data(self, passed_indices, passed_plot):
+
+    # plot the sensor noise
+    passed_plot.plot(passed_indices, self.gui_changes["sensor_noise"][-len(-passed_indices):], label="sensor noise")
+
+    # plot the wheel noise
+    passed_plot.plot(passed_indices, self.gui_changes["wheel_noise"][-len(passed_indices):], label="wheel noise")
+
+    # add legend
+    passed_plot.legend()
+
+    return passed_indices, passed_plot
+
+
+
 if __name__ == "__main__":
     game = MazeGame()
     game.run()
-    game.robot.plot_error()
+    indices, plot = game.robot.plot_error()
+    indices, plot = plot_extra_data(game, indices, plot)
+    plot.show()

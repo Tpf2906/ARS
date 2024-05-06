@@ -338,7 +338,8 @@ class Robot:
         plt.title('Kalman Filter Squared Error')
         plt.legend()
         plt.grid(True)
-        plt.show()
+
+        return indices, plt
         
         
     def restore_defaults(self):
