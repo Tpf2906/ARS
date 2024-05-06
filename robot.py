@@ -305,6 +305,7 @@ class Robot:
             pygame.draw.line(screen, sensor_color, (self.x, self.y), (end_x, end_y), 2)
             self._draw_sensor_text(screen, sensor_distance, sensor_angle)
 
+
     def plot_error(self):
         """
         Plot the log difference between every 30th updated estimated position and the past positions
@@ -338,3 +339,13 @@ class Robot:
         plt.legend()
         plt.grid(True)
         plt.show()
+        
+        
+    def restore_defaults(self):
+        """
+        Restore the default settings for the robot.
+        """
+        self.sensor_noise = self.sensor_noise
+        self.wheel_noise = self.wheel_noise
+        self.kalman_call_interval = self.kalman_call_interval
+
