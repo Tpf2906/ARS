@@ -26,8 +26,6 @@ class MazeGame:
         self.moving_left = False
         self.moving_right = False
 
-        self.wheel_noise = 1
-
     def run(self):
         """Run the main game loop."""
         running = True
@@ -45,14 +43,10 @@ class MazeGame:
             # Move the robot
             if vr != 0 or vl != 0:
 
-                # genrate random noise for the wheel powerbetween -0.1 and 0.1
-                vl_noise = random.uniform(-0.2, 0.2) * self.wheel_noise
-                vr_noise = random.uniform(-0.2, 0.2) * self.wheel_noise
-
                 # move the robot with the diff drive model
-                self.robot.move_with_diff_drive(vl + vl_noise, vr + vr_noise)
+                self.robot.move_with_diff_drive(vl, vr)
 
-                if counter % 30 == 0:
+                if counter % self.robot.kalman_call_interval == 0:
                     # run the kalman filter
                     self.robot.run_kalman_filter(vl, vr)
 

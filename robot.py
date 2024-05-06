@@ -3,6 +3,7 @@ robot.py: A simple robot class that can move around a maze.
 """
 
 import math
+import random
 import pygame
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,7 +11,8 @@ import matplotlib.pyplot as plt
 from maze import Maze
 from config.maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
 from config.robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
-                          TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE, SENSOR_COLOR_FORWARD)
+                          TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE, SENSOR_COLOR_FORWARD,
+                          SENSOR_NOISE_DEFAULT,WHEEL_NOISE_DEFAULT, KALMAN_CALL_INTERVAL)
 from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
 
@@ -35,6 +37,9 @@ class Robot:
         self.past_positions = [(self.x, self.y)]
         self.beacon_count = [0]
         self.estimated_positions = [(self.x, self.y)] # Store estimated positions for drawing later
+        self.wheel_noise = WHEEL_NOISE_DEFAULT
+        self.sensor_noise = SENSOR_NOISE_DEFAULT
+        self.kalman_call_interval = KALMAN_CALL_INTERVAL
 
         # Initialize the Kalman filter
         state_transition_matrix = np.eye(3)
@@ -172,6 +177,10 @@ class Robot:
         # Create state vector
         state = [self.x, self.y, self.angle, vl, vr]
 
+        # apply noise to the wheel power
+        state[3] += random.uniform(-vl, vl) * self.wheel_noise
+        state[4] += random.uniform(-vr, vr) * self.wheel_noise
+
         # Update the state
         new_state = motion_with_collision(state, 1, self.maze.rect_list, self.mask)
 
@@ -212,6 +221,10 @@ class Robot:
             dy = ly - self.y
             distance = np.sqrt(dx ** 2 + dy ** 2)
             bearing = np.arctan2(dy, dx) - self.angle
+
+            #add noise to the sensor reading
+            distance += random.uniform(-distance, distance) * self.sensor_noise
+            bearing += random.uniform(-bearing, bearing) * self.sensor_noise
 
             # add the bearing and distance to the measurement vector
             measurement_vector.extend([bearing, distance])
@@ -291,13 +304,13 @@ class Robot:
 
             pygame.draw.line(screen, sensor_color, (self.x, self.y), (end_x, end_y), 2)
             self._draw_sensor_text(screen, sensor_distance, sensor_angle)
-    
+
     def plot_error(self):
         """
-        Plot the log difference between every 30th updated estimated position and the past positions.
+        Plot the log difference between every 30th updated estimated position and the past positions
         """
         # Indices that correspond to the estimated updates
-        update_interval = 30
+        update_interval = self.kalman_call_interval
         indices = np.arange(0, len(self.past_positions), update_interval)
 
         # Use only those indices to fetch past and estimated positions
