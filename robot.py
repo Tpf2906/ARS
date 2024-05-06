@@ -32,6 +32,7 @@ class Robot:
         self.prev_x, self.prev_y = 0, 0
         self.mask = self._make_mask()
         self.past_positions = [(self.x, self.y)]
+        self.beacon_count = [0]
         self.estimated_positions = [(self.x, self.y)] # Store estimated positions for drawing later
 
         # Initialize the Kalman filter
@@ -232,7 +233,11 @@ class Robot:
                 # Add high uncertainty to the measurement
                 self.kalman_filter.noise_covariance_measurement[i][i] = 1
                 self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = 1
-        print (f"counter: {counter}")
+
+        # add number of beacons to history
+        self.beacon_count.append(counter)
+
+        # Convert the measurement vector to a numpy array
         measurement_vector = np.array(measurement_vector)
 
         # Correct step in Kalman filter
@@ -313,9 +318,10 @@ class Robot:
         # Plot the squared errors
         plt.figure(figsize=(10, 6))
         plt.plot(indices, log_errors, label='Log Error')
-        plt.xlabel('Index')
-        plt.ylabel('Squared Error')
-        plt.title('Kalman Filter Squared Error (Every 30th Position)')
+        plt.plot(indices, self.beacon_count, label='Beacon Count')
+        plt.xlabel('Time Step (Every 30th frame)')
+        plt.ylabel('Shared y-axis for Log Error and Beacon Count')
+        plt.title('Kalman Filter Squared Error')
         plt.legend()
         plt.grid(True)
         plt.show()
