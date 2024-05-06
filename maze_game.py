@@ -1,7 +1,6 @@
 """ main.py used to run the game """
 # disabling pylint no-member error for pygame
 # pylint: disable=no-member
-import sys
 import pygame
 import pygame_gui
 from maze import Maze
@@ -237,8 +236,6 @@ class MazeGame:
             counter += 1
 
         pygame.quit()
-        sys.exit()
-        
         
     def handle_controls(self, keys):
         """
