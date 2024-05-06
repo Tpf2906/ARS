@@ -5,13 +5,14 @@ robot.py: A simple robot class that can move around a maze.
 import math
 import pygame
 import numpy as np
+import matplotlib.pyplot as plt
+
 from maze import Maze
 from config.maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
 from config.robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE, SENSOR_COLOR_FORWARD)
 from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
-import matplotlib.pyplot as plt
 
 
 class Robot:
