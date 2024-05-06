@@ -13,6 +13,8 @@ from config.maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
 from config.robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE, SENSOR_COLOR_FORWARD,
                           SENSOR_NOISE_DEFAULT,WHEEL_NOISE_DEFAULT, KALMAN_CALL_INTERVAL)
+from config.kalman_config import (NOISE_COVARIANCE_MEASUREMENT_FALSE, NOISE_COVARIANCE_MEASUREMENT_TRUE,
+                                  NOISE_COVARIANCE_X, NOISE_COVARIANCE_Y, NOISE_COVARIANCE_THETA)
 from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
 
@@ -41,11 +43,20 @@ class Robot:
         self.sensor_noise = SENSOR_NOISE_DEFAULT
         self.kalman_call_interval = KALMAN_CALL_INTERVAL
 
+        #TODO: (tiago) please set the defaults in the Kalm class, and remove the defaults here
         # Initialize the Kalman filter
         state_transition_matrix = np.eye(3)
         control_input_matrix = np.zeros((3, 2))
         observation_matrix = None  # Will be defined dynamically in the Kalman filter class
-        noise_covariance = np.diag([0.01, 0.01, 0.01])
+        noise_covariance = np.diag([NOISE_COVARIANCE_X,
+                                    NOISE_COVARIANCE_Y,
+                                    NOISE_COVARIANCE_THETA])
+        
+        # used in run_kalman_filter()
+        self.noise_covariance_measurement_true = NOISE_COVARIANCE_MEASUREMENT_TRUE
+        self.noise_covariance_measurement_false = NOISE_COVARIANCE_MEASUREMENT_FALSE
+
+    
         noise_covariance_measurement = np.diag([0.1, 0.1] * len(maze.landmarks))
         state_estimate = np.array([self.x, self.y, self.angle])
         error_covariance = np.eye(3)
@@ -236,14 +247,14 @@ class Robot:
                 counter += 1
 
                 # set default uncertainty for the measurement
-                self.kalman_filter.noise_covariance_measurement[i][i] = 0.0000000001
-                self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = 0.0000000001
+                self.kalman_filter.noise_covariance_measurement[i][i] = self.noise_covariance_measurement_true
+                self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = self.noise_covariance_measurement_true
 
             else:
 
                 # Add high uncertainty to the measurement
-                self.kalman_filter.noise_covariance_measurement[i][i] = 1
-                self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = 1
+                self.kalman_filter.noise_covariance_measurement[i][i] = self.noise_covariance_measurement_false
+                self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = self.noise_covariance_measurement_false
 
         # add number of beacons to history
         self.beacon_count.append(counter)
