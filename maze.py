@@ -5,7 +5,7 @@ from typing import List
 import random
 import pygame
 
-from maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, NUM_LANDMARKS, LANDMARK_COLOR
+from config.maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, NUM_LANDMARKS, LANDMARK_COLOR
 
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)

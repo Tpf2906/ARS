@@ -5,7 +5,7 @@ import pygame
 import random
 
 from maze import Maze
-from maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
+from config.maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from robot import Robot
 
 

@@ -1,7 +1,7 @@
 """ main game loop"""
 #pylint: disable=no-member
 import pygame
-from robot_config import ROBOT_RADIUS
+from config.robot_config import ROBOT_RADIUS
 
 # Initialize Pygame
 pygame.init()

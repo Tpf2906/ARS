@@ -6,8 +6,8 @@ import math
 import pygame
 import numpy as np
 from maze import Maze
-from maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
-from robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
+from config.maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
+from config.robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE, SENSOR_COLOR_FORWARD)
 from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision

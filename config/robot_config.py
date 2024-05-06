@@ -1,5 +1,5 @@
 """config file for robot.py"""
-import maze_config
+from config import maze_config
 
 ROBOT_RADIUS = maze_config.CELL_SIZE // 3
 ROBOT_COLOR = (255, 0, 0)

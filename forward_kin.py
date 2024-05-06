@@ -3,7 +3,7 @@ import numpy as np
 
 import pygame
 
-from robot_config import ROBOT_RADIUS
+from config.robot_config import ROBOT_RADIUS
 from collision_config import NORTH, SOUTH, EAST, WEST, CENTER
 
 
