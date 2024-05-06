@@ -48,7 +48,6 @@ class Robot:
                                           observation_matrix, noise_covariance,
                                           noise_covariance_measurement, state_estimate,
                                           error_covariance)
-        #pylint: enable=invalid-name
 
 
     def _make_mask(self):
