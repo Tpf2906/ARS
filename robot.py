@@ -321,17 +321,24 @@ class Robot:
         """
         Plot the log difference between every 30th updated estimated position and the past positions
         """
-        # Indices that correspond to the estimated updates
         update_interval = self.kalman_call_interval
-        indices = np.arange(0, len(self.past_positions), update_interval)
+        
+        # Indices that correspond to the estimated updates
+        past_indices = np.arange(0, len(self.past_positions), update_interval)
+        est_indices = np.arange(0, len(self.estimated_positions))
+        
+        # Only keep indices that are within bounds
+        common_indices = np.minimum(len(est_indices), len(past_indices))
+        past_indices = past_indices[:common_indices]
+        est_indices = est_indices[:common_indices]
 
         # Use only those indices to fetch past and estimated positions
-        past_indices = [self.past_positions[i] for i in indices]
-        estimated_indices = [self.estimated_positions[i // update_interval] for i in indices]
+        past_positions = [self.past_positions[i] for i in past_indices]
+        estimated_positions = [self.estimated_positions[i] for i in est_indices]
 
         # Convert lists of tuples to numpy arrays for vectorized operations
-        past = np.array(past_indices)
-        estimated = np.array(estimated_indices)
+        past = np.array(past_positions)
+        estimated = np.array(estimated_positions)
 
         # Compute the squared differences for each coordinate
         squared_errors = np.sum((past - estimated) ** 2, axis=1)
@@ -341,8 +348,8 @@ class Robot:
         # Plot the squared errors
         plt.figure(figsize=(10, 6))
 
-        plt.plot(indices, log_errors, label='Log Error')
-        plt.plot(indices, self.beacon_count[-len(indices):], label='Beacon Count')
+        plt.plot(past_indices, log_errors, label='Log Error')
+        plt.plot(past_indices, self.beacon_count[-len(past_indices):], label='Beacon Count')
 
         plt.xlabel('Time Step (Every 30th frame)')
         plt.ylabel('Shared y-axis for Log Error and Beacon Count')
@@ -350,7 +357,7 @@ class Robot:
         plt.legend()
         plt.grid(True)
 
-        return indices, plt
+        return past_indices, plt
         
         
     def restore_defaults(self):
