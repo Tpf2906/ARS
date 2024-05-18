@@ -7,6 +7,9 @@ from maze import Maze
 from config.maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from config.robot_config import ROBOT_SPEED
 from robot import Robot
+from evolutionary_algorithm import EvolutionaryAlgorithm
+import numpy as np
+from fitness import evaluate_fitness
 
 
 class MazeGame:
@@ -37,6 +40,7 @@ class MazeGame:
             "R_y": [self.robot.kalman_filter.noise_covariance[1][1]],
             "R_t": [self.robot.kalman_filter.noise_covariance[2][2]],
         }
+        self.evo_algorithm = EvolutionaryAlgorithm(population_size=8, input_size=15, hidden_size=10, output_size=2)
 
 
     def setup_gui(self):
@@ -177,6 +181,7 @@ class MazeGame:
         """
         running = True
         counter = 0
+        generations = 8 # number of generations in evolutionary algorithm
         while running:
             time_delta = self.clock.tick(60)/1000.0
             for event in pygame.event.get():
@@ -263,12 +268,24 @@ class MazeGame:
                         self.kalman_interval_entry.set_text(str(self.robot.kalman_call_interval))
 
             self.manager.update(time_delta)
-                
-            # list of keys pressed
-            keys = pygame.key.get_pressed()
 
-            # handle the controls
-            vr, vl = self.handle_controls(keys)
+        
+            # when counter reaches threshold, run the evolutionary algorithm    
+            #TODO: fix the counter to be more accurate
+            if counter %  (generations * self.evo_algorithm.population_size) == 0:
+                # run the evolutionary algorithm
+                fitness_scores = [evaluate_fitness(self.robot, individual) for individual in self.evo_algorithm.population]
+                self.evo_algorithm.evolve(fitness_scores)
+            
+            #TODO: use guessed positions
+            
+            best_individual = self.evo_algorithm.population[0]
+            sensors = self.robot.sensors
+            position = (self.robot.x, self.robot.y)
+            angle = self.robot.angle
+            inputs = np.concatenate((sensors, [position[0], position[1], angle]))
+
+            vl, vr = best_individual.forward(inputs)
 
             # move the robot
             if vr != 0 or vl != 0:

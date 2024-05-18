@@ -17,6 +17,7 @@ from config.kalman_config import (NOISE_COVARIANCE_MEASUREMENT_FALSE, NOISE_COVA
                                   NOISE_COVARIANCE_X, NOISE_COVARIANCE_Y, NOISE_COVARIANCE_THETA)
 from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
+from ann import ANNController
 
 
 class Robot:
@@ -39,6 +40,7 @@ class Robot:
         self.past_positions = [(self.x, self.y)]
         self.beacon_count = [0]
         self.estimated_positions = [(self.x, self.y)] # Store estimated positions for drawing later
+        self.explored_grid = np.zeros((HEIGHT // CELL_SIZE, WIDTH // CELL_SIZE), dtype=bool)
         self.wheel_noise = WHEEL_NOISE_DEFAULT
         self.sensor_noise = SENSOR_NOISE_DEFAULT
         self.kalman_call_interval = KALMAN_CALL_INTERVAL
@@ -65,6 +67,10 @@ class Robot:
                                           observation_matrix, noise_covariance,
                                           noise_covariance_measurement, state_estimate,
                                           error_covariance)
+        
+        # Initialize the ANN controller
+        self.ann_controller = ANNController(NUM_SENSORS + 3, 10, 2) # 3 for position and angle
+                                                                    #2 for left and right wheel power
 
 
     def _make_mask(self):
@@ -367,4 +373,24 @@ class Robot:
         self.sensor_noise = self.sensor_noise
         self.wheel_noise = self.wheel_noise
         self.kalman_call_interval = self.kalman_call_interval
+    
+    def reset(self):
+        """Reset the robot to its initial state."""
+        self.x, self.y = self.past_positions[0]
+        self.angle = 0
+        self.sensors = [0] * NUM_SENSORS
+        self.past_positions = [(self.x, self.y)]
+        self.beacon_count = [0]
+        self.estimated_positions = [(self.x, self.y)]
+        self.kalman_filter.state_estimate = np.array([self.x, self.y, self.angle])
+        self.kalman_filter.error_covariance = np.eye(3)
+        self.update_sensors()
+
+    def calculate_explored_area(self):
+        """Calculate the area explored by the robot."""
+        grid_x = int(self.x // CELL_SIZE)
+        grid_y = int(self.y // CELL_SIZE)
+        self.explored_grid[grid_y, grid_x] = True
+        return np.sum(self.explored_grid)
+
 
