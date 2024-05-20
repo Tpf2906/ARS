@@ -2,7 +2,7 @@ import numpy as np
 
 #makes robot move and returns the explored area
 
-def evaluate_fitness(robot, ann_controller, steps=500):
+def fitness(robot, ann_controller, steps=500):
     robot.reset()
     for _ in range(steps):
         sensors = robot.sensors

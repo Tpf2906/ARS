@@ -388,9 +388,10 @@ class Robot:
 
     def calculate_explored_area(self):
         """Calculate the area explored by the robot."""
-        grid_x = int(self.x // CELL_SIZE)
-        grid_y = int(self.y // CELL_SIZE)
-        self.explored_grid[grid_y, grid_x] = True
+        for x, y in self.past_positions:
+            grid_x = int(x // CELL_SIZE)
+            grid_y = int(y // CELL_SIZE)
+            self.explored_grid[grid_y, grid_x] = True
         return np.sum(self.explored_grid)
 
 

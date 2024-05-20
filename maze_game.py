@@ -10,7 +10,7 @@ from config.robot_config import ROBOT_SPEED
 from robot import Robot
 from evolutionary_algorithm import EvolutionaryAlgorithm
 import numpy as np
-from fitness import evaluate_fitness
+from fitness import fitness
 
 
 class MazeGame:
@@ -185,11 +185,13 @@ class MazeGame:
         running = True
         counter = 0
         generations = 8 # number of generations in evolutionary algorithm
+        # trains the robot using the evolutionary algorithm for n generations
         for generation in range(generations):
-            fitness_scores = [evaluate_fitness(self.robot, individual) for individual in self.evo_algorithm.population]
+            fitness_scores = [fitness(self.robot, individual) for individual in self.evo_algorithm.population]
             self.evo_algorithm.evolve(fitness_scores)
-        #best_individual = self.evo_algorithm.population[0]
-        best_individual = max(self.evo_algorithm.population, key=lambda ind: evaluate_fitness(self.robot, ind))
+        
+        # save the best individual for experimentation
+        best_individual = max(self.evo_algorithm.population, key=lambda ind: fitness(self.robot, ind))
         np.save('ann_weights.npy', best_individual.get_weights())
 
         while running:
