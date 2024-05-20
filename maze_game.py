@@ -1,6 +1,7 @@
 """ main.py used to run the game """
 # disabling pylint no-member error for pygame
 # pylint: disable=no-member
+import os
 import pygame
 import pygame_gui
 from maze import Maze
@@ -41,7 +42,9 @@ class MazeGame:
             "R_t": [self.robot.kalman_filter.noise_covariance[2][2]],
         }
         self.evo_algorithm = EvolutionaryAlgorithm(population_size=8, input_size=15, hidden_size=10, output_size=2)
-
+        if os.path.exists('ann_weights.npy'):
+            best_weights = np.load('ann_weights.npy')
+            self.evo_algorithm.population[0].set_weights(best_weights)
 
     def setup_gui(self):
         """
@@ -185,7 +188,10 @@ class MazeGame:
         for generation in range(generations):
             fitness_scores = [evaluate_fitness(self.robot, individual) for individual in self.evo_algorithm.population]
             self.evo_algorithm.evolve(fitness_scores)
-        best_individual = self.evo_algorithm.population[0]
+        #best_individual = self.evo_algorithm.population[0]
+        best_individual = max(self.evo_algorithm.population, key=lambda ind: evaluate_fitness(self.robot, ind))
+        np.save('ann_weights.npy', best_individual.get_weights())
+
         while running:
             time_delta = self.clock.tick(60)/1000.0
             for event in pygame.event.get():
