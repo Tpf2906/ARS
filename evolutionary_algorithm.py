@@ -29,6 +29,8 @@ class EvolutionaryAlgorithm:
             # Insert the child into the population if it is fitter than the least fit individual
             if self.insert_child_if_fitter(child, child_fitness, fitness_scores):
                 fitness_scores = self.evaluate_fitness()  # Re-evaluate fitness scores after insertion
+            else:
+                break
             
     # Evaluate the fitness of each individual in the population
     def evaluate_fitness(self):
