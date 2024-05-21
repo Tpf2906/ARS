@@ -41,7 +41,7 @@ class MazeGame:
             "R_y": [self.robot.kalman_filter.noise_covariance[1][1]],
             "R_t": [self.robot.kalman_filter.noise_covariance[2][2]],
         }
-        self.evo_algorithm = EvolutionaryAlgorithm(population_size=8, input_size=15, hidden_size=10, output_size=2)
+        self.evo_algorithm = EvolutionaryAlgorithm(population_size=8, input_size=15, hidden_size=10, output_size=2, robot=self.robot)
         if os.path.exists('ann_weights.npy'):
             best_weights = np.load('ann_weights.npy')
             self.evo_algorithm.population[0].set_weights(best_weights)
@@ -187,8 +187,7 @@ class MazeGame:
         generations = 8 # number of generations in evolutionary algorithm
         # trains the robot using the evolutionary algorithm for n generations
         for generation in range(generations):
-            fitness_scores = [fitness(self.robot, individual) for individual in self.evo_algorithm.population]
-            self.evo_algorithm.evolve(fitness_scores)
+            self.evo_algorithm.evolve()
         
         # save the best individual for experimentation
         best_individual = max(self.evo_algorithm.population, key=lambda ind: fitness(self.robot, ind))

@@ -1,13 +1,15 @@
 # evolutionary_algorithm.py
 import numpy as np
 from ann import ANNController
+from fitness import fitness
 
 class EvolutionaryAlgorithm:
-    def __init__(self, population_size, input_size, hidden_size, output_size, mutation_rate=0.01, crossover_rate=0.7):
+    def __init__(self, population_size, input_size, hidden_size, output_size,robot, mutation_rate=0.01, crossover_rate=0.7):
         self.population_size = population_size
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.output_size = output_size
+        self.robot = robot
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.population = [ANNController(input_size, hidden_size, output_size) for _ in range(population_size)]
@@ -23,14 +25,14 @@ class EvolutionaryAlgorithm:
             parent1, parent2 = self.select_parents(fitness_scores)
             # Create a child by crossover and mutation
             child = self.create_child(parent1, parent2)
-            child_fitness = child.fitness()
+            child_fitness = fitness(self.robot, child)
             # Insert the child into the population if it is fitter than the least fit individual
             if self.insert_child_if_fitter(child, child_fitness, fitness_scores):
                 fitness_scores = self.evaluate_fitness()  # Re-evaluate fitness scores after insertion
             
     # Evaluate the fitness of each individual in the population
     def evaluate_fitness(self):
-        return np.array([individual.fitness() for individual in self.population])
+        return np.array([fitness(self.robot,individual) for individual in self.population])
     
     # Sort the population by fitness
     def rank_population(self, fitness_scores):
