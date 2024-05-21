@@ -6,9 +6,7 @@ def fitness(robot, ann_controller, steps=500):
     robot.reset()
     for _ in range(steps):
         sensors = robot.sensors
-        position = (robot.x, robot.y)
-        angle = robot.angle
-        inputs = np.concatenate((sensors, [position[0], position[1], angle]))
+        inputs = np.array(sensors).flatten()
         vl, vr = ann_controller.forward(inputs)
         robot.move_with_diff_drive(vl, vr)
         robot.update_sensors()

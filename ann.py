@@ -14,6 +14,7 @@ class ANNController:
         self.weights_hidden_output = np.random.randn(self.hidden_size, self.output_size)
         # Initial hidden state
         self.hidden_state = np.zeros(self.hidden_size)
+
     
     def forward(self, inputs):
         # Calculate the hidden state with recurrent connection
@@ -33,7 +34,10 @@ class ANNController:
     def set_weights(self, weights):
         input_hidden_size = self.input_size * self.hidden_size
         hidden_hidden_size = self.hidden_size * self.hidden_size
+        hidden_output_size = self.hidden_size * self.output_size
+
         self.weights_input_hidden = weights[:input_hidden_size].reshape((self.input_size, self.hidden_size))
         self.weights_hidden_hidden = weights[input_hidden_size:input_hidden_size + hidden_hidden_size].reshape((self.hidden_size, self.hidden_size))
-        self.weights_hidden_output = weights[input_hidden_size + hidden_hidden_size:].reshape((self.hidden_size, self.output_size))
+        self.weights_hidden_output = weights[input_hidden_size + hidden_hidden_size:input_hidden_size + hidden_hidden_size + hidden_output_size].reshape((self.hidden_size, self.output_size))
+
     
