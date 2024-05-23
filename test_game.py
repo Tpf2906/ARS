@@ -109,16 +109,18 @@ def main():
         '20thgen10pop.npy',
         '20thgen20pop.npy',
         'highmutation.npy',
-        'highsensornoise.npy'
+        'highsensornoise.npy',
+        'hightraintime.npy',
+        'lowtraintime.npy'
     ]
     
     # use multiprocessing to run experiments in parallel
-    pool = multiprocessing.Pool(processes=6)
+    pool = multiprocessing.Pool(processes=8)
     results = pool.starmap(run_experiment, [(wf, grid, rect_list, landmarks) for wf in weight_files])
 
     # plotting results for all 6 experiments
     rows = 2
-    cols = 3
+    cols = 4
     fig, axs = plt.subplots(rows, cols, figsize=(15, 10))
     
     # check if axs is a single-dimensional array, if not, flatten it
