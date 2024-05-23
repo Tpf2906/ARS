@@ -41,7 +41,7 @@ class MazeGame:
             "R_y": [self.robot.kalman_filter.noise_covariance[1][1]],
             "R_t": [self.robot.kalman_filter.noise_covariance[2][2]],
         }
-        self.evo_algorithm = EvolutionaryAlgorithm(population_size=8, input_size=12, hidden_size=10, output_size=2, robot=self.robot)
+        self.evo_algorithm = EvolutionaryAlgorithm(population_size=20, input_size=12, hidden_size=10, output_size=2, robot=self.robot)
         """if os.path.exists('ann_weights.npy'):
             best_weights = np.load('ann_weights.npy')
             self.evo_algorithm.population[0].set_weights(best_weights)"""
@@ -184,18 +184,20 @@ class MazeGame:
         """
         running = True
         counter = 0
-        generations = 8 # number of generations in evolutionary algorithm
+        generations = 2 # number of generations in evolutionary algorithm
         # trains the robot using the evolutionary algorithm for n generations
         for generation in range(generations):
             print(f"Generation {generation + 1}/{generations}")
+            '''
             if generation == 2:
                 best_individual = max(self.evo_algorithm.population, key=lambda ind: fitness(self.robot, ind))
                 np.save('ann_weights2.npy', best_individual.get_weights())
+                '''
             self.evo_algorithm.evolve()
         
         # save the best individual for experimentation
         best_individual = max(self.evo_algorithm.population, key=lambda ind: fitness(self.robot, ind))
-        np.save('ann_weights8.npy', best_individual.get_weights())
+        #np.save('ann_weights8.npy', best_individual.get_weights())
 
         while running:
             time_delta = self.clock.tick(60)/1000.0
@@ -287,7 +289,7 @@ class MazeGame:
             sensors = self.robot.sensors
             position = (self.robot.x, self.robot.y)
             angle = self.robot.angle
-            inputs = np.concatenate((sensors, [position[0], position[1], angle]))
+            inputs = np.array(sensors).flatten()
 
             vl, vr = best_individual.forward(inputs)
 

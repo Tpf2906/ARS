@@ -12,15 +12,31 @@ FONT = pygame.font.SysFont('Arial', 12)
 
 class Maze:
     """Class to generate and draw a maze."""
-    def __init__(self, width, height, cell_size):
+    def __init__(self, width, height, cell_size, grid=None, rect_list=None, landmarks=None):
         self.width = width
         self.height = height
         self.cell_size = cell_size
         self.cols = self.width // self.cell_size
         self.rows = self.height // self.cell_size
-        self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
-        self.rect_list : List[Maze] = [] # List to store the pygame rectangles for the maze
-        self.landmarks = [] # List to store the pygame circles for the landmarks
+        
+        if grid is None:
+            self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
+            self.dfs(1, 1)
+            self.create_rooms(NUM_ROOMS, ROOM_SIZE)
+        else:
+            self.grid = grid
+
+        if rect_list is None:
+            self.rect_list = []
+            self.make_rects()
+        else:
+            self.rect_list = rect_list
+
+        if landmarks is None:
+            self.landmarks = []
+            self.add_landmark(NUM_LANDMARKS)
+        else:
+            self.landmarks = landmarks
 
         self.dfs(1, 1)
         self.create_rooms(NUM_ROOMS, ROOM_SIZE)

@@ -1,8 +1,13 @@
+'''
+This file contains the fitness function to determine the fitness of the robot with the given 
+controller to make it move and return the explored area
+'''
 import numpy as np
 
-#makes robot move and returns the explored area
-
 def fitness(robot, ann_controller, steps=500):
+    '''
+    determine the fitness of the robot with the given controller to make it move and return the explored area
+    '''
     robot.reset()
     for _ in range(steps):
         sensors = robot.sensors
