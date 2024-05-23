@@ -132,8 +132,8 @@ def main():
         axs[i].axis('off')
 
     plt.tight_layout()
-    plt.show()
     plt.savefig('final_maze_comparison.png')
+    plt.show()
     
     # plotting results for explored area
     fig, ax = plt.subplots(figsize=(12, 9))
@@ -142,8 +142,8 @@ def main():
     ax.set_xlabel('Weight File')
     ax.set_ylabel('Explored Area')
     plt.xticks(rotation=20)
-    plt.show()
     plt.savefig('explored_area_comparison.png')
-
+    plt.show()
+        
 if __name__ == "__main__":
     main()
