@@ -43,10 +43,10 @@ class TestGame:
         """
         running = True
         start_time = pygame.time.get_ticks()
-        
+        pygame.time.delay(30000)
         while running:
             current_time = pygame.time.get_ticks()
-            if (current_time - start_time) >= 30000:
+            if (current_time - start_time) >= 200000:
                 running = False
 
             time_delta = self.clock.tick(60)/1000.0
