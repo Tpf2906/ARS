@@ -27,17 +27,6 @@ class MazeGame:
         self.moving_right = False
         self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
         self.setup_gui()
-        self.gui_changes = {
-            "sensor_noise": [self.robot.sensor_noise],
-            "wheel_noise": [self.robot.wheel_noise],
-            "kalman_interval": [],
-            "Q_t": [self.robot.noise_covariance_measurement_true],
-            "Q_F": [self.robot.noise_covariance_measurement_false],
-            "R_x": [self.robot.kalman_filter.noise_covariance[0][0]],
-            "R_y": [self.robot.kalman_filter.noise_covariance[1][1]],
-            "R_t": [self.robot.kalman_filter.noise_covariance[2][2]],
-        }
-
 
     def setup_gui(self):
         """
