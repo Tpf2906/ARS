@@ -2,7 +2,6 @@
 # disabling pylint no-member error for pygame
 # pylint: disable=no-member
 import pygame
-import pygame_gui
 from maze import Maze
 from config.maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from config.robot_config import ROBOT_SPEED
@@ -25,140 +24,6 @@ class MazeGame:
         self.moving_down = False
         self.moving_left = False
         self.moving_right = False
-        self.manager = pygame_gui.UIManager((WIDTH, HEIGHT))
-        self.setup_gui()
-
-    def setup_gui(self):
-        """
-        Setup the GUI elements for the game.
-        """
-        
-        # sensor noise caption
-        self.sensor_noise_caption = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((10, HEIGHT - 30), (100, 20)),
-            text="Sensor Noise:",
-            manager=self.manager
-        )
-        # sensor noise input
-        self.sensor_noise_entry = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((110, HEIGHT - 30), (50, 20)),
-            manager=self.manager
-        )
-        self.sensor_noise_entry.set_text(str(self.robot.sensor_noise))
-
-        ##############################################################
-
-        # wheel noise caption
-        self.wheel_noise_caption = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((160, HEIGHT - 30), (100, 20)),
-            text="Wheel Noise:",
-            manager=self.manager
-        )
-        # wheel noise input
-        self.wheel_noise_entry = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((255, HEIGHT - 30), (50, 20)),
-            manager=self.manager
-        )
-        self.wheel_noise_entry.set_text(str(self.robot.wheel_noise))
-
-        ##############################################################
-
-        # kalman filter call interval caption
-        self.kalman_interval_caption = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((290, HEIGHT - 30), (150, 20)),
-            text="Kalman Interval:",
-            manager=self.manager
-        )
-        # kalman filter call interval input
-        self.kalman_interval_entry = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((420, HEIGHT - 30), (50, 20)),
-            manager=self.manager
-        )
-        self.kalman_interval_entry.set_text(str(self.robot.kalman_call_interval))
-
-        ##############################################################
-
-        # place holder q matrix 1
-        self.q_matrix_1 = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((460, HEIGHT - 30), (50, 20)),
-            text="Q_t:",
-            manager=self.manager
-        )
-        # place holder q matrix 1 input
-        self.q_matrix_1_entry = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((495, HEIGHT - 30), (50, 20)),
-            manager=self.manager
-        )
-        self.q_matrix_1_entry.set_text(str(self.robot.noise_covariance_measurement_true))
-
-        ##############################################################
-
-        # place holder q matrix 2
-        self.q_matrix_2 = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((535, HEIGHT - 30), (50, 20)),
-            text="Q_F:",
-            manager=self.manager
-        )
-        # place holder q matrix 2 input
-        self.q_matrix_2_entry = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((570, HEIGHT - 30), (50, 20)),
-            manager=self.manager
-        )
-        self.q_matrix_2_entry.set_text(str(self.robot.noise_covariance_measurement_false))
-
-        ##############################################################
-        
-        # place holder R matrix 1
-        self.r_matrix_1 = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((610, HEIGHT - 30), (50, 20)),
-            text="R_x:",
-            manager=self.manager
-        )
-        # place holder R matrix 1 input
-        self.r_matrix_1_entry = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((645, HEIGHT - 30), (50, 20)),
-            manager=self.manager
-        )
-        self.r_matrix_1_entry.set_text(str(self.robot.kalman_filter.noise_covariance[0][0]))
-
-        ##############################################################
-
-        # place holder R matrix 2
-        self.r_matrix_2 = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((680, HEIGHT - 30), (50, 20)),
-            text="R_y:",
-            manager=self.manager
-        )
-        # place holder R matrix 2 input
-        self.sensor_r_matrix_2_entry = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((720, HEIGHT - 30), (50, 20)),
-            manager=self.manager
-        )
-        self.sensor_r_matrix_2_entry.set_text(str(self.robot.kalman_filter.noise_covariance[1][1]))
-
-        ##############################################################
-        
-        # place holder R matrix 3
-        self.r_matrix_3 = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((760, HEIGHT - 30), (50, 20)),
-            text="R_t:",
-            manager=self.manager
-        )
-        # place holder R matrix 3 input
-        self.r_matrix_3_entry = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((790, HEIGHT - 30), (50, 20)),
-            manager=self.manager
-        )
-        self.r_matrix_3_entry.set_text(str(self.robot.kalman_filter.noise_covariance[2][2]))
-        
-        # restore defaults button
-        self.restore_defaults_button = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((WIDTH - 150, HEIGHT - 30), (150, 20)),
-            text='Restore Defaults',
-            manager=self.manager,
-            object_id="restore_defaults_button"
-        )
-
 
     def run(self):
         """
@@ -167,92 +32,10 @@ class MazeGame:
         running = True
         counter = 0
         while running:
-            time_delta = self.clock.tick(60)/1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
-                # pass event to the manager
-                self.manager.process_events(event)
-                
-                if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
-                    # process text input for each configuration parameter
-                    if event.ui_element == self.sensor_noise_entry:
-                        try:
-                            value = float(event.text)
-                            if 0 <= value <= 1:
-                                self.robot.sensor_noise = value
-                                print(f"Sensor noise: {value}")
-                        except ValueError:
-                            self.sensor_noise_entry.set_text(str(self.robot.sensor_noise))# reset to default value
-
-                    elif event.ui_element == self.wheel_noise_entry:
-                        try:
-                            value = float(event.text)
-                            if 0 <= value <= 1:
-                                self.robot.wheel_noise = value
-                                print(f"Wheel noise: {value}")
-                        except ValueError:
-                            self.wheel_noise_entry.set_text(str(self.robot.wheel_noise))  # reset to default value
-
-                    elif event.ui_element == self.kalman_interval_entry:
-                        try:
-                            value = int(event.text)
-                            if 1 <= value:
-                                self.robot.kalman_call_interval = value
-                                print(f"Kalman interval: {value}")
-                        except ValueError:
-                            self.kalman_interval_entry.set_text(str(self.robot.kalman_call_interval))  # reset to default value
-
-                    elif event.ui_element == self.q_matrix_1_entry:
-                        try:
-                            value = float(event.text)
-                            self.robot.noise_covariance_measurement_true = value
-                            print(f"Q_t: {value}")
-                        except ValueError:
-                            self.q_matrix_1_entry.set_text(str(self.robot.noise_covariance_measurement_true))
-
-                    elif event.ui_element == self.q_matrix_2_entry:
-                        try:
-                            value = float(event.text)
-                            self.robot.noise_covariance_measurement_false = value
-                            print(f"Q_F: {value}")
-                        except ValueError:
-                            self.q_matrix_2_entry.set_text(str(self.robot.noise_covariance_measurement_false))
-
-                    elif event.ui_element == self.r_matrix_1_entry:
-                        try:
-                            value = float(event.text)
-                            self.robot.kalman_filter.noise_covariance[0][0] = value
-                            print(f"R_x: {value}")
-                        except ValueError:
-                            self.r_matrix_1_entry.set_text(str(self.robot.kalman_filter.noise_covariance[0][0]))
-
-                    elif event.ui_element == self.sensor_r_matrix_2_entry:
-                        try:
-                            value = float(event.text)
-                            self.robot.kalman_filter.noise_covariance[1][1] = value
-                            print(f"R_y: {value}")
-                        except ValueError:
-                            self.sensor_r_matrix_2_entry.set_text(str(self.robot.kalman_filter.noise_covariance[1][1]))
-
-                    elif event.ui_element == self.r_matrix_3_entry:
-                        try:
-                            value = float(event.text)
-                            self.robot.kalman_filter.noise_covariance[2][2] = value
-                            print(f"R_t: {value}")
-                        except ValueError:
-                            self.r_matrix_3_entry.set_text(str(self.robot.kalman_filter.noise_covariance[2][2]))
-
-                elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == self.restore_defaults_button:
-                        self.robot.restore_defaults()  # restore default values
-                        self.sensor_noise_entry.set_text(str(self.robot.sensor_noise))
-                        self.wheel_noise_entry.set_text(str(self.robot.wheel_noise))
-                        self.kalman_interval_entry.set_text(str(self.robot.kalman_call_interval))
-
-            self.manager.update(time_delta)
-                
             # list of keys pressed
             keys = pygame.key.get_pressed()
 
@@ -282,7 +65,6 @@ class MazeGame:
             self.robot.draw_path(self.screen)
             self.robot.update_sensors()
             self.robot.draw(self.screen)
-            self.manager.draw_ui(self.screen)
             self.screen.blit(speed_text, (10, 10))
 
             pygame.display.flip()
@@ -290,7 +72,7 @@ class MazeGame:
             counter += 1
 
         pygame.quit()
-        
+
     def handle_controls(self, keys):
         """
         Handle the controls for the robot.
