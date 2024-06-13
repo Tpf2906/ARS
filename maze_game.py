@@ -356,44 +356,7 @@ class MazeGame:
         vl, vr = vr * ROBOT_SPEED , vl * ROBOT_SPEED
 
         return vr, vl
-    
-def plot_extra_data(self, passed_indices, passed_plot):
-
-    # plot the sensor noise
-    passed_plot.plot(passed_indices, self.gui_changes["sensor_noise"][-len(-passed_indices):], label="sensor noise")
-
-    # plot the wheel noise
-    passed_plot.plot(passed_indices, self.gui_changes["wheel_noise"][-len(passed_indices):], label="wheel noise")
-
-    #TODO: add after fixing the kalman interval, unchangable during runtime
-    # plot the kalman interval
-
-    # plot the Q_t
-    passed_plot.plot(passed_indices, self.gui_changes["Q_t"][-len(passed_indices):], label="Q_t")
-
-    # plot the Q_F
-    passed_plot.plot(passed_indices, self.gui_changes["Q_F"][-len(passed_indices):], label="Q_F")
-
-    # plot the R_x
-    passed_plot.plot(passed_indices, self.gui_changes["R_x"][-len(passed_indices):], label="R_x")
-
-    # plot the R_y
-    passed_plot.plot(passed_indices, self.gui_changes["R_y"][-len(passed_indices):], label="R_y")
-
-    # plot the R_t
-    passed_plot.plot(passed_indices, self.gui_changes["R_t"][-len(passed_indices):], label="R_t")
-    
-
-    # add legend
-    passed_plot.legend()
-
-    return passed_indices, passed_plot
-
-
 
 if __name__ == "__main__":
     game = MazeGame()
     game.run()
-    indices, plot = game.robot.plot_error()
-    indices, plot = plot_extra_data(game, indices, plot)
-    plot.show()
