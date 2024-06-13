@@ -13,7 +13,7 @@ class MazeGame:
     Handle game initialization and the main game loop.
     """
 
-    def __init__(self):
+    def __init__(self, with_gui=True):
         pygame.init()
         pygame.display.set_caption("Maze Robot Simulation")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -24,6 +24,7 @@ class MazeGame:
         self.moving_down = False
         self.moving_left = False
         self.moving_right = False
+        self.with_gui = with_gui
 
     def run(self):
         """
@@ -59,15 +60,17 @@ class MazeGame:
             vr, vl = 0, 0
 
             # draw the maze, robot and speed cltext
-            self.screen.fill(WHITE)
-            self.maze.draw(self.screen)
-            self.robot.draw_landmark_raycast(self.screen)
-            self.robot.draw_path(self.screen)
-            self.robot.update_sensors()
-            self.robot.draw(self.screen)
-            self.screen.blit(speed_text, (10, 10))
+            if self.with_gui:
+                self.screen.fill(WHITE)
+                self.maze.draw(self.screen)
+                self.robot.draw_landmark_raycast(self.screen)
+                self.robot.draw_path(self.screen)
+                self.robot.update_sensors()
+                self.robot.draw(self.screen)
+                self.screen.blit(speed_text, (10, 10))
 
-            pygame.display.flip()
+                pygame.display.flip()
+
             self.clock.tick(60)
             counter += 1
 
