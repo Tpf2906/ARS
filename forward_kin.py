@@ -4,7 +4,7 @@ import numpy as np
 import pygame
 
 from config.robot_config import ROBOT_RADIUS
-from collision_config import NORTH, SOUTH, EAST, WEST, CENTER
+from config.collision_config import NORTH, SOUTH, EAST, WEST, CENTER
 
 
 L = ROBOT_RADIUS # distance between wheels

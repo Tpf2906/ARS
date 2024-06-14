@@ -3,7 +3,7 @@
    these need to be updated every time the ROBOT_RADIUS is changed"""
 
 import numpy as np
-from collison_calibration import run_calibration
+from config.collison_calibration import run_calibration
 
 # update these values when ROBOT_RADIUS is changed
 NORTH = (10,0)
