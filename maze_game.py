@@ -25,56 +25,43 @@ class MazeGame:
         self.moving_left = False
         self.moving_right = False
         self.with_gui = with_gui
+        self.counter = 0
 
-    def run(self):
+    def step(self, vr, vl):
         """
-        Run the main game loop.
+        Run the game loop one step.
         """
-        running = True
-        counter = 0
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
 
-            # list of keys pressed
-            keys = pygame.key.get_pressed()
+        # move the robot
+        if vr != 0 or vl != 0:
 
-            # handle the controls
-            vr, vl = self.handle_controls(keys)
+            # move the robot with the diff drive model
+            self.robot.move_with_diff_drive(vl, vr)
 
-            # move the robot
-            if vr != 0 or vl != 0:
+            if self.counter % self.robot.kalman_call_interval == 0:
+                # run the kalman filter
+                self.robot.run_kalman_filter(vl, vr)
 
-                # move the robot with the diff drive model
-                self.robot.move_with_diff_drive(vl, vr)
+        # create the speed text
+        speed_text = FONT.render(f'wheel power: {vl} | {vr}', True, WHITE)
 
-                if counter % self.robot.kalman_call_interval == 0:
-                    # run the kalman filter
-                    self.robot.run_kalman_filter(vl, vr)
+        # reset the wheel power, to avoid continuous movement
+        vr, vl = 0, 0
 
-            # create the speed text
-            speed_text = FONT.render(f'wheel power: {vl} | {vr}', True, WHITE)
+        # draw the maze, robot and speed cltext
+        if self.with_gui:
+            self.screen.fill(WHITE)
+            self.maze.draw(self.screen)
+            self.robot.draw_landmark_raycast(self.screen)
+            self.robot.draw_path(self.screen)
+            self.robot.update_sensors()
+            self.robot.draw(self.screen)
+            self.screen.blit(speed_text, (10, 10))
 
-            # reset the wheel power, to avoid continuous movement
-            vr, vl = 0, 0
+            pygame.display.flip()
 
-            # draw the maze, robot and speed cltext
-            if self.with_gui:
-                self.screen.fill(WHITE)
-                self.maze.draw(self.screen)
-                self.robot.draw_landmark_raycast(self.screen)
-                self.robot.draw_path(self.screen)
-                self.robot.update_sensors()
-                self.robot.draw(self.screen)
-                self.screen.blit(speed_text, (10, 10))
-
-                pygame.display.flip()
-
-            self.clock.tick(60)
-            counter += 1
-
-        pygame.quit()
+        self.clock.tick(60)
+        self.counter += 1
 
     def handle_controls(self, keys):
         """
@@ -107,5 +94,6 @@ class MazeGame:
         return vr, vl
 
 if __name__ == "__main__":
+    from controllers import human_controls
     game = MazeGame()
-    game.run()
+    human_controls(game)
