@@ -3,29 +3,70 @@
 from typing import List
 
 import random
-import pygame
+import time
 
-from config.maze_config import NUM_ROOMS, ROOM_SIZE, BLACK, NUM_LANDMARKS, LANDMARK_COLOR
+import pygame
+import numpy as np
+
+from config.maze_config import (NUM_ROOMS, ROOM_SIZE, BLACK, NUM_LANDMARKS,
+                                LANDMARK_COLOR, CELL_SIZE, WIDTH, HEIGHT)
 
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)
 
 class Maze:
     """Class to generate and draw a maze."""
-    def __init__(self, width, height, cell_size):
+    def __init__(self, width= WIDTH, height= HEIGHT, cell_size= CELL_SIZE, grid=None):
         self.width = width
         self.height = height
         self.cell_size = cell_size
         self.cols = self.width // self.cell_size
         self.rows = self.height // self.cell_size
-        self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
-        self.rect_list : List[Maze] = [] # List to store the pygame rectangles for the maze
-        self.landmarks = [] # List to store the pygame circles for the landmarks
 
-        self.dfs(1, 1)
-        self.create_rooms(NUM_ROOMS, ROOM_SIZE)
+        if grid is None:
+            self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
+            self.rect_list : List[Maze] = [] # List to store the pygame rectangles for the maze
+            self.landmarks = [] # List to store the pygame circles for the landmarks
+
+            self.dfs(1, 1)
+            self.create_rooms(NUM_ROOMS, ROOM_SIZE)
+            self.make_rects()
+            self.add_landmark(NUM_LANDMARKS)
+
+            self._save_grid_to_file()
+        else:
+            grid = grid.tolist() if isinstance(grid, np.ndarray) else grid
+            self._build_from_grid(grid)
+
+    def _save_grid_to_file(self):
+        """Save the grid to a file."""
+        map_array = np.array(self.grid)
+
+        # set the file name to the current time and 4 random letters
+        random_letters = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=4))
+        file_name = f"{time.strftime('%Y%m%d-%H%M%S')}-{random_letters}.npy"
+
+        # save the map array to the file
+        np.save("maps/" + file_name, map_array)
+
+    def _build_from_grid(self, grid):
+        """Build the maze from a grid."""
+        self.grid = grid
+        self.rows = len(grid)
+        self.cols = len(grid[0])
+        self.rect_list = []
+        self.landmarks = []
         self.make_rects()
-        self.add_landmark(NUM_LANDMARKS)
+        self._add_landmarl_from_grid()
+
+    def _add_landmarl_from_grid(self):
+        for x in range(self.rows):
+            for y in range(self.cols):
+                if self.grid[x][y] == 2:
+                    # Store the center of the landmark
+                    center_x = y * self.cell_size + self.cell_size // 2
+                    center_y = x * self.cell_size + self.cell_size // 2
+                    self.landmarks.append((center_x, center_y))
 
     def dfs(self, start_x, start_y):
         """Generate the maze."""

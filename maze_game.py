@@ -1,7 +1,10 @@
 """ main.py used to run the game """
 # disabling pylint no-member error for pygame
 # pylint: disable=no-member
+import os
+import numpy as np
 import pygame
+
 from maze import Maze
 from config.maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from config.robot_config import ROBOT_SPEED
@@ -13,12 +16,17 @@ class MazeGame:
     Handle game initialization and the main game loop.
     """
 
-    def __init__(self, with_gui=True):
+    def __init__(self, with_gui=True, grid_map=None):
         pygame.init()
         pygame.display.set_caption("Maze Robot Simulation")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
-        self.maze = Maze(WIDTH, HEIGHT, CELL_SIZE)
+
+        if map is None:
+            self.maze = Maze(WIDTH, HEIGHT, CELL_SIZE)
+        else:
+            self.maze = Maze(grid=grid_map)
+
         self.robot = Robot(self.maze, (CELL_SIZE * 1.5, CELL_SIZE * 1.5))
         self.moving_up = False
         self.moving_down = False
@@ -95,5 +103,13 @@ class MazeGame:
 
 if __name__ == "__main__":
     from controllers import human_controls
-    game = MazeGame()
+
+    # find the first .npy file in the maps directory
+    saved_grid_map = None #pylint: disable=invalid-name
+    for file in os.listdir("maps"):
+        if file.endswith(".npy"):
+            saved_grid_map = np.load("maps/" + file)
+            break
+
+    game = MazeGame(grid_map=saved_grid_map)
     human_controls(game)
