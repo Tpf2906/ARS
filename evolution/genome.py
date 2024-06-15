@@ -6,17 +6,17 @@ import numpy as np
 
 class Genome(ABC):
     """an abstract class for all the different genome classes"""
-    def __init__(self, input_size=None, genome_dict=None):
-        if input_size is not None:
-            # Initialize weights and biases
-            self.weights = np.random.randn(input_size, 2)
-            self.biases = np.random.randn(2)
-            self.fitness = None
-        else:
+    def __init__(self, input_size=16, genome_dict=None):
+        if genome_dict is not None:
             # Load the genome from a dictionary
             self.weights = genome_dict["weights"]
             self.biases = genome_dict["biases"]
             self.fitness = genome_dict["fitness"]
+        else:
+            # Initialize weights and biases
+            self.weights = np.random.randn(input_size, 2)
+            self.biases = np.random.randn(2)
+            self.fitness = None
 
     def take_action(self, state):
         """take an action based on the input X"""
