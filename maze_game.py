@@ -87,8 +87,7 @@ class MazeGame:
         step_data = {"sensors": self.robot.sensors,
                      "collided": collided,
                      "dust_ratio": dust_ratio,
-                     #TODO: should be the estimated state
-                     "position": (self.robot.x, self.robot.y)}
+                     "position": self.robot.estimated_positions[-1]}
 
         return step_data
 
