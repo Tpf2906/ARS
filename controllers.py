@@ -21,7 +21,7 @@ def human_controls(game: MazeGame):
 
     pygame.quit() #pylint: disable=no-member
 
-def ai_run(game: MazeGame, genome: Genome= None, steps: int= 1000):
+def ai_run(game: MazeGame, genome: Genome= None, steps: int= 200):
     """control the game with the ai."""
     episode_step_data = []
 
