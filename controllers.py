@@ -45,6 +45,10 @@ def ai_run(game: MazeGame, genome: Genome= None, steps: int= 1000):
         # Get the inputs from the genome
         vr_input, vl_input = genome.take_action(state)
 
+        # normalize the inputs to be between -1 and 1
+        vr_input = max(min(vr_input, 1), -1)
+        vl_input = max(min(vl_input, 1), -1)
+
         # Step the game
         data = game.step(vr_input, vl_input)
 
