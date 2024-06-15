@@ -193,7 +193,7 @@ class Robot:
         state[4] += random.uniform(-vr, vr) * self.wheel_noise
 
         # Update the state
-        new_state = motion_with_collision(state, 1, self.maze.rect_list, self.mask)
+        new_state, collided = motion_with_collision(state, 1, self.maze.rect_list, self.mask)
 
         # Update the robot's position
         self.x, self.y, self.angle = new_state[0], new_state[1], new_state[2]
@@ -206,6 +206,8 @@ class Robot:
         self.y = max(self.y, ROBOT_RADIUS)
         self.x = min(self.x, WIDTH - ROBOT_RADIUS)
         self.y = min(self.y, HEIGHT - ROBOT_RADIUS)
+
+        return collided
 
 
     def run_kalman_filter(self, vl, vr):

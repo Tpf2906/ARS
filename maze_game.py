@@ -40,11 +40,14 @@ class MazeGame:
         Run the game loop one step.
         """
 
+        # collison flag
+        collided = False
+
         # move the robot
         if vr != 0 or vl != 0:
 
             # move the robot with the diff drive model
-            self.robot.move_with_diff_drive(vl, vr)
+            collided = self.robot.move_with_diff_drive(vl, vr)
 
             if self.counter % self.robot.kalman_call_interval == 0:
                 # run the kalman filter
@@ -68,8 +71,15 @@ class MazeGame:
 
             pygame.display.flip()
 
+        # tick the clock
         self.clock.tick(60)
+
+        # count the frame/step
         self.counter += 1
+
+        # return data for training
+        #TODO: (Jounaid) return the robot sensor data and collision flag
+        return None
 
     def handle_controls(self, keys):
         """

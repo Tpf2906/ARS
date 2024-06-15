@@ -61,6 +61,8 @@ def motion_with_collision(state, d_t, rectangle_list, mask: pygame.mask.Mask):
     # detect collison with the maze walls
     collision_list = collision_type(state, rectangle_list, mask)
 
+    collided = True if len(collision_list) > 0 else False
+
     # movement without collision
     (x, y, theta) = motion_without_collison(state, d_t)
 
@@ -77,7 +79,7 @@ def motion_with_collision(state, d_t, rectangle_list, mask: pygame.mask.Mask):
         elif collision == "WEST":
             x = max(state[0], x) # west is x decreasing, so we set x to 0. or positive to away from the wall pylint: disable=line-too-long
 
-    return (x, y, theta)
+    return (x, y, theta), collided
 
 def collision_type(state, rectangle_list, robot_mask: pygame.mask.Mask):
     """detect the type of collision with the maze walls"""
