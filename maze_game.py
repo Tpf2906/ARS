@@ -9,6 +9,7 @@ from maze import Maze
 from config.maze_config import WIDTH, HEIGHT, CELL_SIZE, WHITE, FONT
 from config.robot_config import ROBOT_SPEED
 from robot import Robot
+from dust import Dust
 
 
 class MazeGame:
@@ -34,6 +35,8 @@ class MazeGame:
         self.moving_right = False
         self.with_gui = with_gui
         self.counter = 0
+
+        self.dust = Dust(self.maze.grid)
 
     def step(self, vr, vl):
         """
@@ -77,9 +80,17 @@ class MazeGame:
         # count the frame/step
         self.counter += 1
 
+        # calculate dust cleaned
+        dust_ratio = self.dust.clean_dust(self.robot.x, self.robot.y)
+
         # return data for training
-        #TODO: (Jounaid) return the robot sensor data and collision flag
-        return None
+        step_data = {"sensors": self.robot.sensors,
+                     "collided": collided,
+                     "dust_ratio": dust_ratio,
+                     #TODO: should be the estimated state
+                     "position": (self.robot.x, self.robot.y)}
+        
+        return step_data
 
     def handle_controls(self, keys):
         """
