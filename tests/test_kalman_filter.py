@@ -30,7 +30,7 @@ def test_predict_and_correct(kf):
 
     estimated_state = kalman_filter.state_estimate
     print("Estimated state:", estimated_state)
-    assert np.allclose(estimated_state, np.array([1, 0.1, 0.05]), atol=1e-2), "Estimated state does not match expected"
+    assert np.allclose(estimated_state, np.array([1, 0.1, 0.05]), atol=1e-2), "Estimated state does not match expected" #pylint: disable=line-too-long
 
 def test_initial_state(kf):
     kalman_filter, _ = kf

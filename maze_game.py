@@ -89,7 +89,7 @@ class MazeGame:
                      "dust_ratio": dust_ratio,
                      #TODO: should be the estimated state
                      "position": (self.robot.x, self.robot.y)}
-        
+
         return step_data
 
     def handle_controls(self, keys):

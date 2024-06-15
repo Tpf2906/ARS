@@ -6,14 +6,13 @@ import math
 import random
 import pygame
 import numpy as np
-import matplotlib.pyplot as plt
 
 from maze import Maze
 from config.maze_config import CELL_SIZE, WIDTH, HEIGHT, FONT, BLUE
 from config.robot_config import (ROBOT_RADIUS, ROBOT_COLOR, SENSOR_COLOR, SENSOR_COLOR_LANDMARK,
                           TEXT_COLOR, NUM_SENSORS, SENSOR_MAX_DISTANCE, SENSOR_COLOR_FORWARD,
                           SENSOR_NOISE_DEFAULT,WHEEL_NOISE_DEFAULT, KALMAN_CALL_INTERVAL)
-from config.kalman_config import (NOISE_COVARIANCE_MEASUREMENT_FALSE, NOISE_COVARIANCE_MEASUREMENT_TRUE,
+from config.kalman_config import (NOISE_COVARIANCE_MEASUREMENT_FALSE, NOISE_COVARIANCE_MEASUREMENT_TRUE, #pylint: disable=line-too-long
                                   NOISE_COVARIANCE_X, NOISE_COVARIANCE_Y, NOISE_COVARIANCE_THETA)
 from kalman_filter import KalmanFilter
 from forward_kin import motion_with_collision
@@ -51,12 +50,12 @@ class Robot:
         noise_covariance = np.diag([NOISE_COVARIANCE_X,
                                     NOISE_COVARIANCE_Y,
                                     NOISE_COVARIANCE_THETA])
-        
+
         # used in run_kalman_filter()
         self.noise_covariance_measurement_true = NOISE_COVARIANCE_MEASUREMENT_TRUE
         self.noise_covariance_measurement_false = NOISE_COVARIANCE_MEASUREMENT_FALSE
 
-    
+
         noise_covariance_measurement = np.diag([0.1, 0.1] * len(maze.landmarks))
         state_estimate = np.array([self.x, self.y, self.angle])
         error_covariance = np.eye(3)
@@ -248,6 +247,7 @@ class Robot:
                 # increment the counter, beacon is visible
                 counter += 1
 
+                #pylint: disable=line-too-long
                 # set default uncertainty for the measurement
                 self.kalman_filter.noise_covariance_measurement[i][i] = self.noise_covariance_measurement_true
                 self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = self.noise_covariance_measurement_true
@@ -257,6 +257,7 @@ class Robot:
                 # Add high uncertainty to the measurement
                 self.kalman_filter.noise_covariance_measurement[i][i] = self.noise_covariance_measurement_false
                 self.kalman_filter.noise_covariance_measurement[i + 1][i + 1] = self.noise_covariance_measurement_false
+                #pylint: enable=line-too-long
 
         # add number of beacons to history
         self.beacon_count.append(counter)
@@ -317,7 +318,7 @@ class Robot:
 
             pygame.draw.line(screen, sensor_color, (self.x, self.y), (end_x, end_y), 2)
             self._draw_sensor_text(screen, sensor_distance, sensor_angle)
-        
+
     def restore_defaults(self):
         """
         Restore the default settings for the robot.
@@ -325,4 +326,3 @@ class Robot:
         self.sensor_noise = self.sensor_noise
         self.wheel_noise = self.wheel_noise
         self.kalman_call_interval = self.kalman_call_interval
-
