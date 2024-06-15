@@ -24,7 +24,7 @@ class MazeGame:
         self.clock = pygame.time.Clock()
 
         #TODO: build game with Maze rather than grid file
-        if map is None:
+        if grid_map is None:
             self.maze = Maze(WIDTH, HEIGHT, CELL_SIZE)
         else:
             self.maze = Maze(grid=grid_map)
