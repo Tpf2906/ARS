@@ -33,7 +33,7 @@ class Maze:
             self.make_rects()
             self.add_landmark(NUM_LANDMARKS)
 
-            self._save_grid_to_file()
+            self.file_name = self._save_grid_to_file()
         else:
             grid = grid.tolist() if isinstance(grid, np.ndarray) else grid
             self._build_from_grid(grid)
@@ -44,10 +44,12 @@ class Maze:
 
         # set the file name to the current time and 4 random letters
         random_letters = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=4))
-        file_name = f"{time.strftime('%Y%m%d-%H%M%S')}-{random_letters}.npy"
+        file_name = f"maps/{time.strftime('%Y%m%d-%H%M%S')}-{random_letters}.npy"
 
         # save the map array to the file
-        np.save("maps/" + file_name, map_array)
+        np.save(file_name, map_array)
+
+        return file_name
 
     def _build_from_grid(self, grid):
         """Build the maze from a grid."""
