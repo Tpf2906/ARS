@@ -34,14 +34,17 @@ def ai_run(game: MazeGame, genome: Genome= None, steps: int= 200):
         "position": game.robot.estimated_positions[-1]
     }
 
-    state = _flatten_state_dict(state_dict)
+    # add intial state to the episode step data
+    episode_step_data.append(state_dict)
 
     #make sure the genome is not None
     if genome is None:
-        genome = BasicGenome(state.shape[0])
+        genome = BasicGenome(16)
 
     # Run the game for the specified number of steps
     for _ in range(steps):
+        # Flatten the state dictionary
+        state = _flatten_state_dict(episode_step_data[-1])
 
         # Get the inputs from the genome
         vr_input, vl_input = genome.take_action(state)
