@@ -95,7 +95,7 @@ if __name__ == "__main__":
         # create the genome
         input_genome = BasicGenome(genome_dict=genome_dict)
 
-    except FileNotFoundError:
+    except: #pylint: disable=bare-except
         input_genome = None #pylint: disable=invalid-name
 
     test_game = MazeGame()
