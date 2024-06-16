@@ -46,14 +46,14 @@ class Genitor(Evolver):
         """
 
         for i in range(number_of_generations):
-            # generate a new map set per generation
-            self.evaluator.generate_map_set()
 
+            # increase episode steps by geration
+            steps = 50 + self.generations * 10
             # 1. Evaluate and rank the population
             for j, genome in enumerate(self.population):
 
                 # Evaluate the genome
-                self.evaluator.calculate_fitness(genome)
+                self.evaluator.calculate_fitness(genome, steps)
                 print(f"Generation: {self.generations}, Cycle: {i}/{number_of_generations}, Genome: {j}, Fitness: {genome.fitness}") #pylint: disable=line-too-long
 
             # rank the population
@@ -71,17 +71,20 @@ class Genitor(Evolver):
                 offspring.mutate()
 
             # 4. evaluate the offspring
-            self.evaluator.calculate_fitness(offspring)
+            self.evaluator.calculate_fitness(offspring, steps)
 
             # 5. Replace the worst genome with the offspring
             self.population.append(offspring)
             self.population.sort(reverse=True)
-            self.population.pop()
+            self.population.pop(-1)
 
             # update the best genome
             self.best_genome = self.population[0]
             self.best_genome.save_genome(f"best_genome_{self.experiment_name}_{self.generations}")
 
+            # print population average fitness
+            print(f"Generation: {self.generations}, Average Fitness: {sum([genome.fitness for genome in self.population])/self.population_size}") #pylint: disable=line-too-long
+            print()
+
             # increment the generation
             self.generations += 1
-            print()

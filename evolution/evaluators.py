@@ -21,17 +21,16 @@ class Evaluator(ABC):
         return grid
 
 
-    def calculate_fitness(self, genome: Genome):
+    def calculate_fitness(self, genome: Genome, steps: int):
         """ fitness function that takes the percentage of dust cleaned minus the collisions"""
         # reset the fitness
-        genome.fitness = None
         scores = []
         for grid in self.grid:
 
             # run the genome on the map
             maze = MazeGame(grid_map=grid)
             maze.with_gui = True
-            episode_step_data = ai_run(maze, genome)
+            episode_step_data = ai_run(maze, genome, steps=steps)
             # calculate the fitness
             score = self._calculate_score(episode_step_data)
 
@@ -54,6 +53,6 @@ class Simple(Evaluator):
         collisions = sum([1 for data in episode_step_data if data["collided"]])
 
         # calculate the score
-        score = (episode_step_data[-1]["dust_ratio"] - collisions) / len(episode_step_data)
+        score = episode_step_data[-1]["dust_ratio"] * 1000/ (collisions + len(episode_step_data))
 
         return score
