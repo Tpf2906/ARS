@@ -84,11 +84,12 @@ class BasicGenome(Genome):
         # random choice between weight and bias
         choice = np.random.choice([0, 1])
 
-        # random index for mutation
-        index = np.random.randint(0, self.weights.shape[0])
-
         # mutate the genome
         if choice == 0:
+            # random index for mutation
+            index = np.random.randint(0, self.weights.shape[0])
             self.weights[index] += np.random.uniform(-0.1, 0.1)
         else:
+            # random index for mutation
+            index = np.random.randint(0, self.biases.shape[0])
             self.biases[index] += np.random.uniform(-0.1, 0.1)
