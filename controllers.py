@@ -1,4 +1,5 @@
 """module for handling the controls of the game though various methods."""
+import os
 import numpy as np
 import pygame
 
@@ -83,8 +84,19 @@ def _flatten_state_dict(state_dict):
     return flattened_array
 
 if __name__ == "__main__":
-    # run ai_run with a genome for testing purposes
-    # gui is set to True to see the game
+    # load the first .npy file in the genomes folder if it exists
+    try:
+        # check for file ending in .npy eplicitly
+        genome_file = [file for file in os.listdir("genomes") if file.endswith(".npy")][0]
+
+        # load the genome as dictionary
+        genome_dict = np.load("genomes/" + genome_file, allow_pickle=True).item()
+
+        # create the genome
+        input_genome = BasicGenome(genome_dict=genome_dict)
+
+    except FileNotFoundError:
+        input_genome = None #pylint: disable=invalid-name
 
     test_game = MazeGame()
-    ai_run(test_game)
+    ai_run(test_game, input_genome)
