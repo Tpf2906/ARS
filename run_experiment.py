@@ -2,7 +2,7 @@
 import argparse
 
 from config.robot_config import SENSOR_MAX_DISTANCE, SENSOR_NOISE_DEFAULT
-
+from config.maze_config import MAP_NAME
 from evolution.evolvers import Genitor
 from evolution.genome import BasicGenome
 
@@ -20,12 +20,6 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def set_experiment_parameters(args):
-    """Set parameters for the experiment based on parsed arguments."""
-    global SENSOR_NOISE_DEFAULT, SENSOR_MAX_DISTANCE #pylint: disable=global-statement
-    SENSOR_NOISE_DEFAULT = args.sensor_noise
-    SENSOR_MAX_DISTANCE = args.max_sensor_length
-
 def run_experiment(population_size, generations, experiment_name, mutation_chance):
     """Run the evolution experiment."""
     evolver = Genitor(population_size=population_size,
@@ -36,7 +30,6 @@ def run_experiment(population_size, generations, experiment_name, mutation_chanc
 def main():
     """Main function to run the experiment."""
     args = parse_arguments()
-    set_experiment_parameters(args)
     run_experiment(args.population_size, args.generations, args.experiment_name, args.mutation_chance) #pylint: disable=line-too-long
 
 if __name__ == "__main__":

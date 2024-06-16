@@ -15,3 +15,4 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 FONT = pygame.font.SysFont('Arial', 18)
+MAP_NAME = None

@@ -9,7 +9,7 @@ import pygame
 import numpy as np
 
 from config.maze_config import (NUM_ROOMS, ROOM_SIZE, BLACK, NUM_LANDMARKS,
-                                LANDMARK_COLOR, CELL_SIZE, WIDTH, HEIGHT)
+                                LANDMARK_COLOR, CELL_SIZE, WIDTH, HEIGHT, MAP_NAME)
 
 pygame.font.init()
 FONT = pygame.font.SysFont('Arial', 12)
@@ -22,6 +22,8 @@ class Maze:
         self.cell_size = cell_size
         self.cols = self.width // self.cell_size
         self.rows = self.height // self.cell_size
+        self.map_name = MAP_NAME
+        print("map name", self.map_name)
 
         if grid is None:
             self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
@@ -42,9 +44,12 @@ class Maze:
         """Save the grid to a file."""
         map_array = np.array(self.grid)
 
-        # set the file name to the current time and 4 random letters
-        random_letters = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=4))
-        file_name = f"maps/{time.strftime('%Y%m%d-%H%M%S')}-{random_letters}.npy"
+        # use map name or generate a random letter string
+        addition = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=4))
+        if self.map_name:
+            addition = self.map_name + '-' + addition
+
+        file_name = f"maps/{time.strftime('%Y%m%d-%H%M%S')}-{addition}.npy"
 
         # save the map array to the file
         np.save(file_name, map_array)
