@@ -46,6 +46,8 @@ class Genitor(Evolver):
         """
 
         for i in range(number_of_generations):
+            # generate a new map set per generation
+            self.evaluator.generate_map_set()
 
             # 1. Evaluate and rank the population
             for j, genome in enumerate(self.population):

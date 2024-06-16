@@ -9,9 +9,17 @@ from maze import Maze
 class Evaluator(ABC):
     """an abstract class for all the different fitness functions"""
     def __init__(self, number_of_maps=5):
-        self.grid = []
-        for _ in range(number_of_maps):
+        self.number_of_maps = number_of_maps
+        self.grid = self.generate_map_set()
+
+    def generate_map_set(self):
+        """generate a set of maps"""
+        grid = []
+        for _ in range(self.number_of_maps):
             self.grid.append(Maze().grid)
+
+        return grid
+
 
     def calculate_fitness(self, genome: Genome):
         """ fitness function that takes the percentage of dust cleaned minus the collisions"""
