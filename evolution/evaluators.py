@@ -54,6 +54,6 @@ class Simple(Evaluator):
         collisions = sum([1 for data in episode_step_data if data["collided"]])
 
         # calculate the score
-        score = episode_step_data[-1]["dust_ratio"] - collisions / len(episode_step_data)
+        score = (episode_step_data[-1]["dust_ratio"] - collisions) / len(episode_step_data)
 
         return score

@@ -11,6 +11,9 @@ class Dust:
         self.remaining_dust_amount = 0
         self.clean_ratio = 0
 
+        # set the dust on the grid
+        self.set_dust()
+
     def set_dust(self):
         "set the dust on the grids where the grid is a landmark or floor tile (not a wall)"
 
