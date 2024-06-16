@@ -6,6 +6,7 @@ import pygame
 from evolution.genome import Genome
 from evolution.genome import BasicGenome
 from maze_game import MazeGame
+from config.robot_config import ROBOT_SPEED
 
 def human_controls(game: MazeGame):
     """control the game with the keyboard."""
@@ -50,8 +51,8 @@ def ai_run(game: MazeGame, genome: Genome= None, steps: int= 200):
         vr_input, vl_input = genome.take_action(state)
 
         # normalize the inputs to be between -1 and 1
-        vr_input = max(min(vr_input, 1), -1)
-        vl_input = max(min(vl_input, 1), -1)
+        vr_input = max(min(vr_input, 1), -1) * ROBOT_SPEED
+        vl_input = max(min(vl_input, 1), -1) * ROBOT_SPEED
 
         # Step the game
         data = game.step(vr_input, vl_input)

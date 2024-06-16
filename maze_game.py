@@ -76,7 +76,7 @@ class MazeGame:
             pygame.display.flip()
 
         # tick the clock
-        self.clock.tick(60)
+        #self.clock.tick(60)
 
         # count the frame/step
         self.counter += 1
