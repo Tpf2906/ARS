@@ -21,7 +21,9 @@ class Evaluator(ABC):
         for grid in self.grid:
 
             # run the genome on the map
-            episode_step_data = ai_run(MazeGame(grid_map=grid), genome)
+            maze = MazeGame(grid_map=grid)
+            maze.with_gui = True
+            episode_step_data = ai_run(maze, genome)
             # calculate the fitness
             score = self._calculate_score(episode_step_data)
 
