@@ -14,8 +14,8 @@ def parse_arguments():
     parser.add_argument("--sensor_noise", type=float, default=SENSOR_NOISE_DEFAULT, help="Noise level for the sensors")
     parser.add_argument("--max_sensor_length", type=int, default=SENSOR_MAX_DISTANCE, help="Maximum length of the sensor")
     parser.add_argument("--mutation_chance", type=float, default=0.1, help="Probability of mutation")
-    parser.add_argument("--population_size", type=int, default=50, help="Size of the population")
-    parser.add_argument("--generations", type=int, default=100, help="Number of generations")
+    parser.add_argument("--population_size", type=int, default=24, help="Size of the population")
+    parser.add_argument("--generations", type=int, default=200, help="Number of generations")
     #pylint: enable=line-too-long
 
     return parser.parse_args()
