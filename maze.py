@@ -23,7 +23,6 @@ class Maze:
         self.cols = self.width // self.cell_size
         self.rows = self.height // self.cell_size
         self.map_name = MAP_NAME
-        print("map name", self.map_name)
 
         if grid is None:
             self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
