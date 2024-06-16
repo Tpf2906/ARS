@@ -6,7 +6,6 @@ from typing import List
 
 from evolution.evaluators import Simple
 from evolution.genome import Genome
-from config.evolver_config import MUTATION_CHANCE
 
 class Evolver(ABC):
     """an abstract class for all the different evolver classes"""
@@ -27,12 +26,12 @@ class Evolver(ABC):
         self.population : List[Genome]= [genome_class() for _ in range(population_size)]
 
     @abstractmethod
-    def evolve(self, number_of_generations):
+    def evolve(self, number_of_generations, mutation_chance):
         """evolve the population based on the episode step data"""
 
 class Genitor(Evolver):
     """a class for the GENITOR algorithm"""
-    def evolve(self, number_of_generations, mutation_chance=MUTATION_CHANCE):
+    def evolve(self, number_of_generations, mutation_chance):
         """run the GENITOR algorithm for the specified number of generations.
         Algorithm:
         1. Evaluate and rank the population

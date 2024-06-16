@@ -2,7 +2,6 @@
 import argparse
 
 from config.robot_config import SENSOR_MAX_DISTANCE, SENSOR_NOISE_DEFAULT
-from config.evolver_config import MUTATION_CHANCE
 
 from evolution.evolvers import Genitor
 from evolution.genome import BasicGenome
@@ -11,9 +10,10 @@ def parse_arguments():
     """Parse command line arguments."""
     #pylint: disable=line-too-long
     parser = argparse.ArgumentParser(description="Simulation Parameters")
+    parser.add_argument("--experiment_name", type=str,required=True, help="Name of the experiment")
     parser.add_argument("--sensor_noise", type=float, default=SENSOR_NOISE_DEFAULT, help="Noise level for the sensors")
     parser.add_argument("--max_sensor_length", type=int, default=SENSOR_MAX_DISTANCE, help="Maximum length of the sensor")
-    parser.add_argument("--mutation_probability", type=float, default=MUTATION_CHANCE, help="Probability of mutation")
+    parser.add_argument("--mutation_chance", type=float, default=0.1, help="Probability of mutation")
     parser.add_argument("--population_size", type=int, default=50, help="Size of the population")
     parser.add_argument("--generations", type=int, default=100, help="Number of generations")
     #pylint: enable=line-too-long
@@ -22,21 +22,22 @@ def parse_arguments():
 
 def set_experiment_parameters(args):
     """Set parameters for the experiment based on parsed arguments."""
-    global SENSOR_NOISE_DEFAULT, SENSOR_MAX_DISTANCE, MUTATION_CHANCE #pylint: disable=global-statement
+    global SENSOR_NOISE_DEFAULT, SENSOR_MAX_DISTANCE #pylint: disable=global-statement
     SENSOR_NOISE_DEFAULT = args.sensor_noise
     SENSOR_MAX_DISTANCE = args.max_sensor_length
-    MUTATION_CHANCE = args.mutation_probability
 
-def run_experiment(population_size, generations):
+def run_experiment(population_size, generations, experiment_name, mutation_chance):
     """Run the evolution experiment."""
-    evolver = Genitor(10, BasicGenome)
-    evolver.evolve(population_size, generations)
+    evolver = Genitor(population_size=population_size,
+                      genome_class=BasicGenome,
+                      experiment_name=experiment_name)
+    evolver.evolve(number_of_generations=generations, mutation_chance=mutation_chance)
 
 def main():
     """Main function to run the experiment."""
     args = parse_arguments()
     set_experiment_parameters(args)
-    run_experiment(args.population_size, args.generations)
+    run_experiment(args.population_size, args.generations, args.experiment_name, args.mutation_chance) #pylint: disable=line-too-long
 
 if __name__ == "__main__":
     main()
