@@ -16,7 +16,7 @@ class Evaluator(ABC):
         """generate a set of maps"""
         grid = []
         for _ in range(self.number_of_maps):
-            self.grid.append(Maze().grid)
+            grid.append(Maze().grid)
 
         return grid
 
